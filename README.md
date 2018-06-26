@@ -14,7 +14,7 @@ image_jpeg:
   git: git://github.com/yangyxd/flutter_picker.git
 ```
 
-![Alt text](https://github.com/yangyxd/flutter_picker/blob/master/raw/views.gif)
+![image](https://github.com/yangyxd/flutter_picker/blob/master/raw/views.gif)
 
 ```dart
 import 'package:flutter_picker/flutter_picker.dart';
