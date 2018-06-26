@@ -95,36 +95,34 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerIcons(BuildContext context) {
-    new Picker<IconData>(
-        data: <PickerItem<IconData>>[
-          new PickerItem(text: Icon(Icons.add), value: Icons.add, children: <PickerItem<IconData>>[
+    new Picker(
+        data: [
+          new PickerItem(text: Icon(Icons.add), value: Icons.add, children: [
             new PickerItem(text: Icon(Icons.more)),
             new PickerItem(text: Icon(Icons.aspect_ratio)),
             new PickerItem(text: Icon(Icons.android)),
             new PickerItem(text: Icon(Icons.menu)),
           ]),
-          new PickerItem(text: Icon(Icons.title), value: Icons.title, children: <PickerItem<IconData>>[
+          new PickerItem(text: Icon(Icons.title), value: Icons.title, children: [
             new PickerItem(text: Icon(Icons.more_vert)),
             new PickerItem(text: Icon(Icons.ac_unit)),
             new PickerItem(text: Icon(Icons.access_alarm)),
             new PickerItem(text: Icon(Icons.account_balance)),
           ]),
-          new PickerItem(text: Icon(Icons.face), value: Icons.face, children: <PickerItem<IconData>>[
+          new PickerItem(text: Icon(Icons.face), value: Icons.face, children: [
             new PickerItem(text: Icon(Icons.add_circle_outline)),
             new PickerItem(text: Icon(Icons.add_a_photo)),
             new PickerItem(text: Icon(Icons.access_time)),
             new PickerItem(text: Icon(Icons.adjust)),
           ]),
-          new PickerItem(text: Icon(Icons.linear_scale), value: Icons.linear_scale, children: <PickerItem<IconData>>[
+          new PickerItem(text: Icon(Icons.linear_scale), value: Icons.linear_scale, children: [
             new PickerItem(text: Icon(Icons.assistant_photo)),
             new PickerItem(text: Icon(Icons.account_balance)),
             new PickerItem(text: Icon(Icons.airline_seat_legroom_extra)),
             new PickerItem(text: Icon(Icons.airport_shuttle)),
             new PickerItem(text: Icon(Icons.settings_bluetooth)),
           ]),
-          new PickerItem(text: Icon(Icons.close), value: Icons.close, children: <PickerItem<IconData>>[
-
-          ]),
+          new PickerItem(text: Icon(Icons.close), value: Icons.close),
         ],
         title: new Text("选择图标", style: Theme.of(context).textTheme.button),
         onConfirm: (Picker picker, List value) {

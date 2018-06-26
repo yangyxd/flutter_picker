@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 typedef PickerSelectedCallback = void Function(Picker picker, int index, List<int> selecteds);
 typedef PickerConfirmCallback = void Function(Picker picker, List<int> selecteds);
 
+/// 底部弹出选择器
 class Picker<T> {
-  List<PickerItem> data;
+  List<PickerItem<T>> data;
   List<int> selecteds;
   final List pickerdata;
 
@@ -31,7 +32,7 @@ class Picker<T> {
   bool _parseDataOK = false;
   int _maxLevel = 1;
 
-  Widget _widget = null;
+  Widget _widget;
 
   Picker(
       {this.data,
@@ -41,7 +42,7 @@ class Picker<T> {
       this.itemExtent = 28.0,
       this.columnPadding,
       this.textStyle =
-          const TextStyle(color: Color(0xFF000046), fontSize: 18.0),
+          const TextStyle(color: const Color(0xFF000046), fontSize: 18.0),
       this.textAlign = TextAlign.start,
       this.title,
       this.cancelText = 'Cancel',
@@ -51,36 +52,36 @@ class Picker<T> {
       this.changeToFirst = false,
       this.onCancel,
       this.onSelect,
-      this.onConfirm});
+      this.onConfirm}) : assert(data != null || pickerdata != null);
 
   Widget get widget => _widget;
 
-  /** 生成picker控件 */
+  /// 生成picker控件
   Widget makePicker([ThemeData themeData]) {
     _parseData();
     _widget = new _PickerWidget(picker: this, themeData: themeData);
     return _widget;
   }
 
-  /** 显示 picker */
+  /// 显示 picker
   void show(ScaffoldState state, [ThemeData themeData]) {
     state.showBottomSheet((BuildContext context) {
       return makePicker(themeData);
     });
   }
 
-  /** 显示模态 picker */
+  /// 显示模态 picker
   void showModal(ScaffoldState state, [ThemeData themeData]) {
     showModalBottomSheet(context: state.context, builder: (BuildContext context) {
       return makePicker(themeData);
     });
   }
 
-  /** 获取当前选择的值 */
+  /// 获取当前选择的值
   List<T> getSelectedValues() {
     List<T> items = [];
     if (selecteds != null) {
-      List<PickerItem> datas = this.data;
+      List<PickerItem<dynamic>> datas = this.data;
       for (int i = 0; i < selecteds.length; i++) {
         int j = selecteds[i];
         if (j < 0 || j >= datas.length)
@@ -125,7 +126,7 @@ class Picker<T> {
     for (int i = 0; i < pickerdata.length; i++) {
       var item = pickerdata[i];
       if (item is T) {
-        data.add(new PickerItem<T>(value: item as T));
+        data.add(new PickerItem<T>(value: item));
       } else if (item is Map) {
         final Map map = item;
         if (map.length == 0) continue;
@@ -151,11 +152,11 @@ class Picker<T> {
 }
 
 class PickerItem<T> {
-  /** 显示内容  */
+  /// 显示内容
   final Widget text;
-  /** 数据值 */
+  /// 数据值
   final T value;
-  /** 子项 */
+  /// 子项
   final List<PickerItem<T>> children;
 
   PickerItem({this.text, this.value, this.children});
@@ -215,6 +216,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
         if (picker.onCancel != null)
           picker.onCancel();
         Navigator.of(context).pop();
+        picker._widget = null;
       }, child: new Text(picker.cancelText, overflow: TextOverflow.ellipsis, style: theme.textTheme.button)));
     }
     items.add(new Expanded(child: new Container(
@@ -226,6 +228,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
         if (picker.onConfirm != null)
           picker.onConfirm(picker, picker.selecteds);
         Navigator.of(context).pop();
+        picker._widget = null;
       }, child: new Text(picker.confirmText, overflow: TextOverflow.ellipsis, style: theme.textTheme.button)));
     }
     return items;
@@ -237,7 +240,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
     List<Widget> items = [];
     if (picker.data != null && picker.data.length > 0) {
-      List<PickerItem<T>> _datas = picker.data;
+      List<PickerItem<dynamic>> _datas = picker.data;
 
       for (int i = 0; i < picker._maxLevel; i++) {
         Widget view = new Expanded(
@@ -255,13 +258,14 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
               itemExtent: picker.itemExtent,
               onSelectedItemChanged: (int index) {
                 //print("i: $i, index: $index");
-                if (picker.changeToFirst) {
-                  for (int j=i+1; j<picker.selecteds.length; j++) {
-                    picker.selecteds[j] = 0;
-                    picker.scrollController.positions.toList()[j].jumpTo(0.0);
-                  }
-                }
                 setState(() {
+                  if (picker.changeToFirst) {
+                    List<ScrollPosition> _positions =  new List<ScrollPosition>.from(picker.scrollController.positions);
+                    for (int j=i+1; j<picker.selecteds.length; j++) {
+                      picker.selecteds[j] = 0;
+                      _positions[j].jumpTo(0.0);
+                    }
+                  }
                   picker.selecteds[i] = index;
                   if (picker.onSelect != null)
                     picker.onSelect(picker, i, picker.selecteds);
