@@ -10,7 +10,7 @@ Flutter plugin picker.
 
 ```yaml
 # add this line to your dependencies
-image_jpeg:
+flutter_picker:
   git: git://github.com/yangyxd/flutter_picker.git
 ```
 
