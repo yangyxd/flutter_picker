@@ -28,6 +28,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String stateText;
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
         alignment: Alignment.topCenter,
         child: new Column(
           children: <Widget>[
+            (stateText != null) ? Text(stateText) : Container(),
             RaisedButton(
-              color: Colors.blue,
               child: Text('Picker Show'),
               onPressed: () {
                 showPicker(context);
@@ -51,7 +52,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 16.0),
             RaisedButton(
-              color: Colors.green,
               child: Text('Picker Show Modal'),
               onPressed: () {
                 showPickerModal(context);
@@ -59,12 +59,32 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 16.0),
             RaisedButton(
-              color: Colors.cyan,
               child: Text('Picker Show Icons'),
               onPressed: () {
                 showPickerIcons(context);
               },
-            )
+            ),
+            SizedBox(height: 16.0),
+            RaisedButton(
+              child: Text('Picker Show Dialog'),
+              onPressed: () {
+                showPickerDialog(context);
+              },
+            ),
+            SizedBox(height: 16.0),
+            RaisedButton(
+              child: Text('Picker Show Date'),
+              onPressed: () {
+                showPickerDate(context);
+              },
+            ),
+            SizedBox(height: 16.0),
+            RaisedButton(
+              child: Text('Picker Show Datetime'),
+              onPressed: () {
+                showPickerDateTime(context);
+              },
+            ),
           ],
         ),
       ),
@@ -76,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
       pickerdata: new JsonDecoder().convert(PickerData),
       changeToFirst: true,
       textAlign: TextAlign.left,
+      columnPadding: const EdgeInsets.all(8.0),
       onConfirm: (Picker picker, List value) {
         print(value.toString());
         print(picker.getSelectedValues());
@@ -88,8 +109,10 @@ class _MyHomePageState extends State<MyHomePage> {
     new Picker<String>(
       pickerdata: new JsonDecoder().convert(PickerData),
       changeToFirst: true,
+      hideHeader: false,
       onConfirm: (Picker picker, List value) {
         print(value.toString());
+        print(picker.adapter.text);
       }
     ).showModal(_scaffoldKey.currentState);
   }
@@ -124,11 +147,54 @@ class _MyHomePageState extends State<MyHomePage> {
           ]),
           new PickerItem(text: Icon(Icons.close), value: Icons.close),
         ],
-        title: new Text("选择图标", style: Theme.of(context).textTheme.button),
+        title: new Text("Select Icon"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
         }
     ).show(_scaffoldKey.currentState);
   }
+
+  showPickerDialog(BuildContext context) {
+    new Picker<String>(
+        pickerdata: new JsonDecoder().convert(PickerData),
+        hideHeader: true,
+        title: new Text("Select Data"),
+        onConfirm: (Picker picker, List value) {
+          print(value.toString());
+        }
+    ).showDialog(context);
+  }
+
+  showPickerDate(BuildContext context) {
+    new Picker(
+      hideHeader: true,
+      adapter: new DateTimePickerAdapter(),
+      title: new Text("Select Data"),
+      onConfirm: (Picker picker, List value) {
+        print((picker.adapter as DateTimePickerAdapter).value);
+      }
+    ).showDialog(context);
+  }
+
+  showPickerDateTime(BuildContext context) {
+    new Picker(
+        adapter: new DateTimePickerAdapter(
+          type: PickerDateTimeType.kYMDHM_AP,
+          strAMPM: const["上午", "下午"],
+        ),
+        title: new Text("Select DateTime"),
+        onConfirm: (Picker picker, List value) {
+          print(picker.adapter.text);
+        },
+        onSelect: (Picker picker, int index, List<int> selecteds) {
+          this.setState(() {
+            stateText = picker.adapter.toString();
+          });
+        }
+    ).show(_scaffoldKey.currentState);
+  }
+
+
+
 }
