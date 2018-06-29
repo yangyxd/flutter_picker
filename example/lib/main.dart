@@ -180,8 +180,12 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerDateTime(BuildContext context) {
     new Picker(
         adapter: new DateTimePickerAdapter(
-          type: PickerDateTimeType.kYMDHM_AP,
+          type: PickerDateTimeType.kYMD_AP_HM,
+          isNumberMonth: true,
           strAMPM: const["上午", "下午"],
+          year_suffix: "年",
+          month_suffix: "月",
+          day_suffix: "日"
         ),
         title: new Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {

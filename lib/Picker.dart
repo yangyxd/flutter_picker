@@ -20,6 +20,8 @@ class Picker<T> {
 
   final changeToFirst;
 
+  final List<int> columnFlex;
+
   final Widget title;
   final String cancelText;
   final String confirmText;
@@ -59,6 +61,7 @@ class Picker<T> {
       this.headercolor,
       this.changeToFirst = false,
       this.hideHeader = false,
+      this.columnFlex,
       this.onCancel,
       this.onSelect,
       this.onConfirm});
@@ -303,7 +306,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
       for (int i = 0; i < picker._maxLevel; i++) {
         Widget view = new Expanded(
-          flex: 1,
+          flex: adapter.getColumnFlex(i),
           child: Container(
             padding: picker.columnPadding,
             height: picker.height,
@@ -370,6 +373,11 @@ abstract class PickerAdapter<T> {
   void doShow() {}
   void doSelect(int column, int index) {}
 
+  int getColumnFlex(int column) {
+    if (picker.columnFlex != null && column < picker.columnFlex.length)
+      return picker.columnFlex[column];
+    return 1;
+  }
 
   int get maxLevel => getMaxLevel();
   int get length => getLength();
@@ -465,14 +473,20 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
 
 }
 
+/// Picker DateTime Adapter Type
 class PickerDateTimeType {
-  static const int kYMD = 0;  // y, m, d
+  static const int kMDY = 0;  // m, d, y
   static const int kHM = 1;  // hh, mm
   static const int kHMS = 2; // hh, mm, ss
-  static const int kHM_AP = 3; // hh, mm, AM/PM
-  static const int kYMDHM = 4; // y, m, d, hh, mm
-  static const int kYMDHM_AP = 5; // y, m, d, hh, mm, AM/PM
-  static const int kYMDHMS = 6; // y, m, d, hh, mm, ss
+  static const int kHM_AP = 3; // hh, mm, ap(AM/PM)
+  static const int kMDYHM = 4; // m, d, y, hh, mm
+  static const int kMDYHM_AP = 5; // m, d, y, hh, mm, AM/PM
+  static const int kMDYHMS = 6; // m, d, y, hh, mm, ss
+
+  static const int kYMD = 7; // y, m, d
+  static const int kYMDHM = 8; // y, m, d, hh, mm
+  static const int kYMDHMS = 9; // y, m, d, hh, mm, ss
+  static const int kYMD_AP_HM = 10; // y, m, d, ap, hh, mm
 }
 
 class DateTimePickerAdapter extends PickerAdapter<DateTime> {
@@ -481,6 +495,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   final List<String> months;
   final List<String> strAMPM;
   final int yearBegin, yearEnd;
+  final String year_suffix, month_suffix, day_suffix;
 
   static const List<String> MonthsList_EN = const [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -496,11 +511,15 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.yearBegin = 1900,
     this.yearEnd = 2100,
     this.value,
+    this.year_suffix,
+    this.month_suffix,
+    this.day_suffix,
   }) {
    super.picker = picker;
   }
 
   int _col = 0;
+  int _col_ap = -1;
 
   DateTime value;
 
@@ -512,6 +531,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [12, 31, 0, 24, 60],
     [12, 31, 0, 12, 60, 2],
     [12, 31, 0, 24, 60, 60],
+    [0, 12, 31],
+    [0, 12, 31, 24, 60],
+    [0, 12, 31, 24, 60, 60],
+    [0, 12, 31, 2, 12, 60],
   ];
 
   // year 0, month 1, day 2, hour 3, minute 4, sec 5, am/pm 6, hour-ap: 7
@@ -523,6 +546,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [1, 2, 0, 3, 4],
     [1, 2, 0, 7, 4, 6],
     [1, 2, 0, 3, 4, 5],
+    [0, 1, 2],
+    [0, 1, 2, 3, 4],
+    [0, 1, 2, 3, 4, 5],
+    [0, 1, 2, 6, 7, 4],
   ];
 
   static const List<int> leapYearMonths = const <int>[1, 3, 5, 7, 8, 10, 12];
@@ -550,10 +577,14 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       case 1: return 2;  // hh, mm
       case 2: return 3;  // hh, mm, ss
       case 3: return 3;  // hh, mm, AM/PM
-      case 4: return 5;  // y, m, d, hh, mm
-      case 5: return 6;  // y, m, d, hh, mm, AM/PM
-      case 6: return 6;  // y, m, d, hh, mm, ss
-      default: return 3; // y, m, d
+      case 4: return 5;  // m, d, y, hh, mm
+      case 5: return 6;  // m, d, y, hh, mm, AM/PM
+      case 6: return 6;  // m, d, y, hh, mm, ss
+      case 7: return 3;  // y, m, d
+      case 8: return 5;  // y, m, d, hh, mm
+      case 9: return 6;  // y, m, d, hh, mm, ss
+      case 10: return 6;  // y, m, d, ap, hh, mm
+      default: return 3; // m, d, y
     }
   }
 
@@ -568,6 +599,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   void initSelects() {
     if (value == null)
       value = DateTime.now();
+    _col_ap = _getAPColIndex();
     int _maxLevel = getMaxLevel();
     if (picker.selecteds == null || picker.selecteds.length == 0) {
       if (picker.selecteds == null) picker.selecteds = new List<int>();
@@ -581,17 +613,18 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     int coltype = getColumnType(_col);
     switch (coltype) {
       case 0:
-        _text = "${yearBegin + index}";
+        _text = "${yearBegin + index}${_checkStr(year_suffix)}";
         break;
       case 1:
         if (isNumberMonth) {
-          _text = "${index + 1}";
+          _text = "${index + 1}${_checkStr(month_suffix)}";
         } else {
           _text = "${months[index]}";
         }
         break;
       case 2:
-        _text = "${index + 1}"; break;
+        _text = "${index + 1}${_checkStr(day_suffix)}";
+        break;
       case 3:
       case 4:
       case 5:
@@ -616,6 +649,14 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   @override
   String getText() {
     return value.toString();
+  }
+
+  @override
+  int getColumnFlex(int column) {
+    if (getColumnType(column) == 0) {
+      return 3;
+    }
+    return 2;
   }
 
   @override
@@ -671,21 +712,32 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       case 5:
         s = index; break;
       case 6:
-        if (picker.selecteds.last == 0) {
-          if (h > 12) h = h - 12;
-        } else {
-          if (h < 12) h = h + 12;
-        };
+        if (_col_ap >= 0) {
+          if (picker.selecteds[_col_ap] == 0) {
+            if (h > 12) h = h - 12;
+          } else {
+            if (h < 12) h = h + 12;
+          };
+        }
         break;
       case 7:
         h = index;
-        if (picker.selecteds.last == 1)
+        if (_col_ap >= 0 && picker.selecteds[_col_ap] == 1)
           h = h + 12;
         break;
     }
     int cday = _calcDateCount(year, month);
     if (day > cday) day = cday;
     value = new DateTime(year, month, day, h, m, s);
+  }
+
+  int _getAPColIndex() {
+    List<int> items = columnType[type];
+    for (int i=0; i<items.length; i++) {
+      if (items[i] == 6)
+        return i;
+    }
+    return -1;
   }
 
   int _calcDateCount(int year, int month) {
@@ -704,5 +756,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   String intToStr(int v) {
     if (v < 10) return "0$v";
     return "$v";
+  }
+
+  String _checkStr(String v) {
+    if (v == null) return "";
+    return v;
   }
 }
