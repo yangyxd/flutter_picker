@@ -487,6 +487,8 @@ class PickerDateTimeType {
   static const int kYMDHM = 8; // y, m, d, hh, mm
   static const int kYMDHMS = 9; // y, m, d, hh, mm, ss
   static const int kYMD_AP_HM = 10; // y, m, d, ap, hh, mm
+
+  static const int kYM = 11; // y, m
 }
 
 class DateTimePickerAdapter extends PickerAdapter<DateTime> {
@@ -535,6 +537,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [0, 12, 31, 24, 60],
     [0, 12, 31, 24, 60, 60],
     [0, 12, 31, 2, 12, 60],
+    [0, 12],
   ];
 
   // year 0, month 1, day 2, hour 3, minute 4, sec 5, am/pm 6, hour-ap: 7
@@ -550,6 +553,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [0, 1, 2, 3, 4],
     [0, 1, 2, 3, 4, 5],
     [0, 1, 2, 6, 7, 4],
+    [0, 1],
   ];
 
   static const List<int> leapYearMonths = const <int>[1, 3, 5, 7, 8, 10, 12];
@@ -584,6 +588,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       case 8: return 5;  // y, m, d, hh, mm
       case 9: return 6;  // y, m, d, hh, mm, ss
       case 10: return 6;  // y, m, d, ap, hh, mm
+      case 11: return 2;  // y, m
       default: return 3; // m, d, y
     }
   }
