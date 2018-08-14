@@ -1,3 +1,7 @@
+## 0.0.5
+
+* TODO: Adapter add notifyDataChanged function.
+
 ## 0.0.4
 
 * TODO: Add PickerDateTimeType.kYM.

@@ -37,6 +37,7 @@ class Picker<T> {
   int _maxLevel = 1;
 
   Widget _widget;
+  PickerWidgetState _state;
 
   static const double DefaultTextSize = 20.0;
 
@@ -67,6 +68,7 @@ class Picker<T> {
       this.onConfirm});
 
   Widget get widget => _widget;
+  PickerWidgetState get state => _state;
 
   /// 生成picker控件
   Widget makePicker([ThemeData themeData]) {
@@ -211,6 +213,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   void initState() {
     super.initState();
     theme = themeData;
+    picker._state = this;
     picker.adapter.doShow();
 
     if (scrollController.length == 0) {
@@ -293,7 +296,6 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   }
 
   List<Widget> _buildViews() {
-    //print("_buildViews");
     if (theme == null) theme = Theme.of(context);
 
     List<Widget> items = [];
@@ -386,6 +388,16 @@ abstract class PickerAdapter<T> {
   @override
   String toString() {
     return getText();
+  }
+
+  /// 通知适配器数据改变
+  void notifyDataChanged() {
+    if (picker != null && picker.state != null) {
+      picker.adapter.doShow();
+      picker.adapter.initSelects();
+      for (int j = 0; j < picker.selecteds.length; j++)
+        picker.state.scrollController[j].jumpToItem(picker.selecteds[j]);
+    }
   }
 }
 
