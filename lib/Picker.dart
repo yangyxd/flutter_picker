@@ -85,9 +85,9 @@ class Picker<T> {
   }
 
   /// 显示模态 picker
-  void showModal(ScaffoldState state, [ThemeData themeData]) {
+  void showModal(BuildContext context, [ThemeData themeData]) {
     showModalBottomSheet(
-        context: state.context,
+        context: context, //state.context,
         builder: (BuildContext context) {
           return makePicker(themeData);
         });

@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print(value.toString());
         print(picker.adapter.text);
       }
-    ).showModal(_scaffoldKey.currentState);
+    ).showModal(this.context); //_scaffoldKey.currentState);
   }
 
   showPickerIcons(BuildContext context) {
