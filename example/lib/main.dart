@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'PickerData.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() => runApp(new MyApp());
 
@@ -17,6 +18,15 @@ class _MyAppState extends State<MyApp> {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
+        localizationsDelegates: [
+          Picker.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('en', 'US'),
+          const Locale('zh', 'CH'),
+        ],
         home: new MyHomePage());
   }
 }
@@ -73,6 +83,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 16.0),
             RaisedButton(
+              child: Text('Picker Show (Array)'),
+              onPressed: () {
+                showPickerArray(context);
+              },
+            ),
+            SizedBox(height: 16.0),
+            RaisedButton(
               child: Text('Picker Show Date'),
               onPressed: () {
                 showPickerDate(context);
@@ -92,8 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPicker(BuildContext context) {
-    Picker<String> picker = new Picker(
-      pickerdata: new JsonDecoder().convert(PickerData),
+    Picker picker = new Picker(
+      adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       textAlign: TextAlign.left,
       columnPadding: const EdgeInsets.all(8.0),
@@ -106,8 +123,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerModal(BuildContext context) {
-    new Picker<String>(
-      pickerdata: new JsonDecoder().convert(PickerData),
+    new Picker(
+      adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       hideHeader: false,
       onConfirm: (Picker picker, List value) {
@@ -119,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   showPickerIcons(BuildContext context) {
     new Picker(
-        data: [
+        adapter: PickerDataAdapter(data: [
           new PickerItem(text: Icon(Icons.add), value: Icons.add, children: [
             new PickerItem(text: Icon(Icons.more)),
             new PickerItem(text: Icon(Icons.aspect_ratio)),
@@ -146,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
             new PickerItem(text: Icon(Icons.settings_bluetooth)),
           ]),
           new PickerItem(text: Icon(Icons.close), value: Icons.close),
-        ],
+        ]),
         title: new Text("Select Icon"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
@@ -156,12 +173,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerDialog(BuildContext context) {
-    new Picker<String>(
-        pickerdata: new JsonDecoder().convert(PickerData),
+    new Picker(
+        adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData)),
         hideHeader: true,
         title: new Text("Select Data"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
+          print(picker.getSelectedValues());
+        }
+    ).showDialog(context);
+  }
+
+  showPickerArray(BuildContext context) {
+    new Picker(
+        adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData2), isArray: true),
+        hideHeader: true,
+        title: new Text("Please Select"),
+        onConfirm: (Picker picker, List value) {
+          print(value.toString());
+          print(picker.getSelectedValues());
         }
     ).showDialog(context);
   }
@@ -182,7 +212,7 @@ class _MyHomePageState extends State<MyHomePage> {
         adapter: new DateTimePickerAdapter(
           type: PickerDateTimeType.kYMD_AP_HM,
           isNumberMonth: true,
-          strAMPM: const["上午", "下午"],
+          //strAMPM: const["上午", "下午"],
           year_suffix: "年",
           month_suffix: "月",
           day_suffix: "日"
