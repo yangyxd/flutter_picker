@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'PickerData.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/src/material/dialog.dart' as Dialog;
 
 void main() => runApp(new MyApp());
 
@@ -37,6 +38,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final double listSpec = 8.0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String stateText;
 
@@ -60,46 +62,60 @@ class _MyHomePageState extends State<MyHomePage> {
                 showPicker(context);
               },
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: listSpec),
             RaisedButton(
               child: Text('Picker Show Modal'),
               onPressed: () {
                 showPickerModal(context);
               },
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: listSpec),
             RaisedButton(
               child: Text('Picker Show Icons'),
               onPressed: () {
                 showPickerIcons(context);
               },
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: listSpec),
             RaisedButton(
               child: Text('Picker Show Dialog'),
               onPressed: () {
                 showPickerDialog(context);
               },
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: listSpec),
             RaisedButton(
               child: Text('Picker Show (Array)'),
               onPressed: () {
                 showPickerArray(context);
               },
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: listSpec),
+            RaisedButton(
+              child: Text('Picker Show Number'),
+              onPressed: () {
+                showPickerNumber(context);
+              },
+            ),
+            SizedBox(height: listSpec),
             RaisedButton(
               child: Text('Picker Show Date'),
               onPressed: () {
                 showPickerDate(context);
               },
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: listSpec),
             RaisedButton(
               child: Text('Picker Show Datetime'),
               onPressed: () {
                 showPickerDateTime(context);
+              },
+            ),
+            SizedBox(height: listSpec),
+            RaisedButton(
+              child: Text('Picker Show Date Range'),
+              onPressed: () {
+                showPickerDateRange(context);
               },
             ),
           ],
@@ -196,6 +212,28 @@ class _MyHomePageState extends State<MyHomePage> {
     ).showDialog(context);
   }
 
+  showPickerNumber(BuildContext context) {
+    new Picker(
+        adapter: NumberPickerAdapter(data: [
+          NumberPickerColumn(begin: 0, end: 999),
+          NumberPickerColumn(begin: 100, end: 200),
+        ]),
+        delimiter: [
+          PickerDelimiter(child: Container(
+            width: 30.0,
+            alignment: Alignment.center,
+            child: Icon(Icons.more_vert),
+          ))
+        ],
+        hideHeader: true,
+        title: new Text("Please Select"),
+        onConfirm: (Picker picker, List value) {
+          print(value.toString());
+          print(picker.getSelectedValues());
+        }
+    ).showDialog(context);
+  }
+
   showPickerDate(BuildContext context) {
     new Picker(
       hideHeader: true,
@@ -229,6 +267,58 @@ class _MyHomePageState extends State<MyHomePage> {
     ).show(_scaffoldKey.currentState);
   }
 
+  showPickerDateRange(BuildContext context) {
+    Picker ps = new Picker(
+        hideHeader: true,
+        adapter: new DateTimePickerAdapter(type: PickerDateTimeType.kYMD, isNumberMonth: true),
+        onConfirm: (Picker picker, List value) {
+          print((picker.adapter as DateTimePickerAdapter).value);
+        }
+    );
 
+    Picker pe = new Picker(
+        hideHeader: true,
+        adapter: new DateTimePickerAdapter(type: PickerDateTimeType.kYMD),
+        onConfirm: (Picker picker, List value) {
+          print((picker.adapter as DateTimePickerAdapter).value);
+        }
+    );
+
+    List<Widget> actions = [
+      FlatButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: new Text(PickerLocalizations.of(context).cancelText)),
+      FlatButton(
+          onPressed: () {
+            Navigator.pop(context);
+            ps.onConfirm(ps, ps.selecteds);
+            pe.onConfirm(pe, pe.selecteds);
+          },
+          child: new Text(PickerLocalizations.of(context).confirmText))
+    ];
+
+    Dialog.showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text("Select Date Range"),
+            actions: actions,
+            content: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text("Begin:"),
+                  ps.makePicker(),
+                  Text("End:"),
+                  pe.makePicker()
+                ],
+              ),
+            ),
+          );
+        });
+  }
 
 }

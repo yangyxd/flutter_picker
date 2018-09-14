@@ -373,6 +373,23 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
         adapter.setColumn(i);
       }
     }
+    if (picker.delimiter != null) {
+      for (int i=0; i < picker.delimiter.length; i++) {
+        var o = picker.delimiter[i];
+        if (o.child == null)
+          continue;
+        var item = Container(
+          child: o.child,
+          height: picker.height
+        );
+        if (o.column < 0)
+          items.insert(0, item);
+        else if (o.column >= items.length)
+          items.add(item);
+        else
+          items.insert(o.column, item);
+      }
+    }
     return items;
   }
 
@@ -462,6 +479,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     _parseData(pickerdata);
   }
 
+  @override
   bool getIsLinkage() {
     return !isArray;
   }
@@ -630,6 +648,7 @@ class NumberPickerColumn {
   NumberPickerColumn({this.begin = 0, this.end = 9, this.items, this.initValue, this.columnFlex = 1});
 
   int indexOf(int value) {
+    if (value == null) return -1;
     if (items != null) return items.indexOf(value);
     if (value < begin || value > end)
       return -1;
@@ -665,6 +684,11 @@ class NumberPickerAdapter extends PickerAdapter<int> {
   }
 
   @override
+  bool getIsLinkage() {
+    return false;
+  }
+
+  @override
   void setColumn(int index) {
     if (index + 1 >= data.length)
       cur = null;
@@ -693,6 +717,19 @@ class NumberPickerAdapter extends PickerAdapter<int> {
   @override
   int getColumnFlex(int column) {
     return data[column].columnFlex;
+  }
+
+  @override
+  List<int> getSelectedValues() {
+    List<int> _items = [];
+    if (picker.selecteds != null) {
+      for (int i = 0; i < picker.selecteds.length; i++) {
+        int j = picker.selecteds[i];
+        int v = data[i].valueOf(j);
+        _items.add(v);
+      }
+    }
+    return _items;
   }
 }
 
