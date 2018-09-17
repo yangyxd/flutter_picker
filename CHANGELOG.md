@@ -1,3 +1,7 @@
+## 1.0.1
+
+* NumberPickerAdapter Support postfix; suffix.
+
 ## 1.0.0
 
 * Add NumberPickerAdapter, Support specified number range
