@@ -215,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerNumber(BuildContext context) {
     new Picker(
         adapter: NumberPickerAdapter(data: [
-          NumberPickerColumn(begin: 0, end: 999),
+          NumberPickerColumn(begin: 0, end: 999, postfix: Text("\$"), suffix: Icon(Icons.insert_emoticon)),
           NumberPickerColumn(begin: 100, end: 200),
         ]),
         delimiter: [
