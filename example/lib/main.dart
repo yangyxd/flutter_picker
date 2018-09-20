@@ -51,6 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Picker'),
         automaticallyImplyLeading: false,
+        elevation: 0.0,
       ),
       body: Container(
         padding: EdgeInsets.all(10.0),
