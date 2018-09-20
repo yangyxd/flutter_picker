@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'PickerData.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+//import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/src/material/dialog.dart' as Dialog;
 
 void main() => runApp(new MyApp());
@@ -19,15 +19,17 @@ class _MyAppState extends State<MyApp> {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        localizationsDelegates: [
-          Picker.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: [
-          const Locale('en', 'US'),
-          const Locale('zh', 'CH'),
-        ],
+
+//        localizationsDelegates: [
+//          PickerLocalizationsDelegate.delegate, // 如果要使用本地化，请添加此行，则可以显示中文按钮
+//          GlobalMaterialLocalizations.delegate,
+//          GlobalWidgetsLocalizations.delegate,
+//        ],
+//        supportedLocales: [
+//          const Locale('en', 'US'),
+//          const Locale('zh', 'CH'),
+//        ],
+
         home: new MyHomePage());
   }
 }
@@ -109,6 +111,13 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text('Picker Show Datetime'),
               onPressed: () {
                 showPickerDateTime(context);
+              },
+            ),
+            SizedBox(height: listSpec),
+            RaisedButton(
+              child: Text('Picker Show Datetime (24)'),
+              onPressed: () {
+                showPickerDateTime24(context);
               },
             ),
             SizedBox(height: listSpec),
@@ -267,7 +276,30 @@ class _MyHomePageState extends State<MyHomePage> {
     ).show(_scaffoldKey.currentState);
   }
 
+  showPickerDateTime24(BuildContext context) {
+    new Picker(
+        adapter: new DateTimePickerAdapter(
+            type: PickerDateTimeType.kMDYHM,
+            isNumberMonth: true,
+            year_suffix: "年",
+            month_suffix: "月",
+            day_suffix: "日"
+        ),
+        title: new Text("Select DateTime"),
+        onConfirm: (Picker picker, List value) {
+          print(picker.adapter.text);
+        },
+        onSelect: (Picker picker, int index, List<int> selecteds) {
+          this.setState(() {
+            stateText = picker.adapter.toString();
+          });
+        }
+    ).show(_scaffoldKey.currentState);
+  }
+
   showPickerDateRange(BuildContext context) {
+    print("canceltext: ${PickerLocalizations.of(context).cancelText}");
+
     Picker ps = new Picker(
         hideHeader: true,
         adapter: new DateTimePickerAdapter(type: PickerDateTimeType.kYMD, isNumberMonth: true),

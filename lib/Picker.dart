@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/src/material/dialog.dart' as Dialog;
 import 'package:flutter/material.dart';
 
@@ -22,19 +21,20 @@ class PickerLocalizations {
     },
   };
 
+  static PickerLocalizations _static = const PickerLocalizations(null);
+
   final Locale locale;
 
-  PickerLocalizations(this.locale);
+  const PickerLocalizations(this.locale);
 
   static PickerLocalizations of(BuildContext context) {
-    return Localizations.of<PickerLocalizations>(context, PickerLocalizations);
+    return Localizations.of<PickerLocalizations>(context, PickerLocalizations) ?? _static;
   }
 
   Object getItem(String key) {
-    Map localData = localizedValues[locale.languageCode];
-    if (localData == null) return null;
-    print(
-        "PickerLocalizations key: $key, vlaue: ${localData[key]}, locale: ${locale.languageCode}");
+    Map localData;
+    if (locale != null)  localData = localizedValues[locale.languageCode];
+    if (localData == null) return localizedValues['en'][key];
     return localData[key];
   }
 
@@ -43,29 +43,10 @@ class PickerLocalizations {
   List get ampm => getItem("ampm");
 }
 
-class PickerLocalizationsDelegate
-    extends LocalizationsDelegate<PickerLocalizations> {
-  const PickerLocalizationsDelegate();
 
-  @override
-  bool isSupported(Locale locale) => ['en', 'zh'].contains(locale.languageCode);
-
-  @override
-  Future<PickerLocalizations> load(Locale locale) {
-    return SynchronousFuture<PickerLocalizations>(PickerLocalizations(locale));
-  }
-
-  @override
-  bool shouldReload(PickerLocalizationsDelegate old) => false;
-}
-
-/// 底部弹出选择器
+/// 选择器
 class Picker {
   static const double DefaultTextSize = 20.0;
-
-  // 本地化代理
-  static const PickerLocalizationsDelegate delegate =
-      const PickerLocalizationsDelegate();
 
   List<int> selecteds;
   final PickerAdapter adapter;
@@ -965,13 +946,15 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       case 3:
       case 4:
       case 5:
-      case 7:
         _text = "${intToStr(index)}";
         break;
       case 6:
         List _ampm = strAMPM ?? PickerLocalizations.of(context).ampm;
         if (_ampm == null) _ampm = const ['AM', 'PM'];
         _text = "${_ampm[index]}";
+        break;
+      case 7:
+        _text = "${intToStr(index+1)}";
         break;
     }
 
@@ -1015,11 +998,11 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           picker.selecteds[i] = value.second;
           break;
         case 6:
-          picker.selecteds[i] = (value.hour >= 12) ? 1 : 0;
+          picker.selecteds[i] = (value.hour > 12 || value.hour == 0) ? 1 : 0;
           break;
         case 7:
-          picker.selecteds[i] =
-              (value.hour >= 12) ? value.hour - 12 - 1 : value.hour - 1;
+          picker.selecteds[i] = value.hour == 0 ? 11 :
+              (value.hour > 12) ? value.hour - 12 - 1 : value.hour - 1;
           break;
       }
     }
@@ -1057,18 +1040,18 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         s = index;
         break;
       case 6:
-        if (_col_ap >= 0) {
-          if (picker.selecteds[_col_ap] == 0) {
-            if (h > 12) h = h - 12;
-          } else {
-            if (h < 12) h = h + 12;
-          }
-          ;
+        if (picker.selecteds[_col_ap] == 0) {
+          if (h == 0) h = 12;
+          if (h > 12) h = h - 12;
+        } else {
+          if (h < 12) h = h + 12;
+          if (h == 12) h = 0;
         }
         break;
       case 7:
-        h = index;
+        h = index + 1;
         if (_col_ap >= 0 && picker.selecteds[_col_ap] == 1) h = h + 12;
+        if (h > 23) h = 0;
         break;
     }
     int cday = _calcDateCount(year, month);

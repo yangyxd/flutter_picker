@@ -1,3 +1,7 @@
+## 1.0.2
+
+* Repair Bug.
+
 ## 1.0.1
 
 * NumberPickerAdapter Support postfix; suffix.
