@@ -15,7 +15,7 @@ class PickerLocalizationsDelegate
 
   @override
   Future<PickerLocalizations> load(Locale locale) {
-    return SynchronousFuture<PickerLocalizations>(PickerLocalizations(locale));
+    return SynchronousFuture<PickerLocalizations>(new PickerLocalizations(locale));
   }
 
   @override
