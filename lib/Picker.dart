@@ -6,6 +6,7 @@ typedef PickerSelectedCallback = void Function(
     Picker picker, int index, List<int> selecteds);
 typedef PickerConfirmCallback = void Function(
     Picker picker, List<int> selecteds);
+typedef PickerValueFormat<T> = String Function(T value);
 
 class PickerLocalizations {
   static const Map<String, Map<String, Object>> localizedValues = {
@@ -379,8 +380,9 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   void updateScrollController(int i) {
     if (_changeing || !picker.adapter.isLinkage) return;
     _changeing = true;
-    for (int j = i + 1; j < picker.selecteds.length; j++) {
-      scrollController[j].position.notifyListeners();
+    for (int j = 0; j < picker.selecteds.length; j++) {
+      if (j != i)
+        scrollController[j].position.notifyListeners();
     }
     _changeing = false;
   }
@@ -494,23 +496,23 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     return !isArray;
   }
 
-  void _parseData(final List pickerdata) {
-    if (pickerdata != null &&
-        pickerdata.length > 0 &&
+  void _parseData(final List pickerData) {
+    if (pickerData != null &&
+        pickerData.length > 0 &&
         (data == null || data.length == 0)) {
       if (data == null) data = new List<PickerItem<T>>();
       if (isArray) {
-        _parseArrayPickerDataItem(pickerdata, data);
+        _parseArrayPickerDataItem(pickerData, data);
       } else {
-        _parsePickerDataItem(pickerdata, data);
+        _parsePickerDataItem(pickerData, data);
       }
     }
   }
 
-  _parseArrayPickerDataItem(List pickerdata, List<PickerItem> data) {
-    if (pickerdata == null) return;
-    for (int i = 0; i < pickerdata.length; i++) {
-      var v = pickerdata[i];
+  _parseArrayPickerDataItem(List pickerData, List<PickerItem> data) {
+    if (pickerData == null) return;
+    for (int i = 0; i < pickerData.length; i++) {
+      var v = pickerData[i];
       if (!(v is List)) continue;
       List lv = v;
       if (lv.length == 0) continue;
@@ -531,23 +533,23 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     print("data.length: ${data.length}");
   }
 
-  _parsePickerDataItem(List pickerdata, List<PickerItem> data) {
-    if (pickerdata == null) return;
-    for (int i = 0; i < pickerdata.length; i++) {
-      var item = pickerdata[i];
+  _parsePickerDataItem(List pickerData, List<PickerItem> data) {
+    if (pickerData == null) return;
+    for (int i = 0; i < pickerData.length; i++) {
+      var item = pickerData[i];
       if (item is T) {
         data.add(new PickerItem<T>(value: item));
       } else if (item is Map) {
         final Map map = item;
         if (map.length == 0) continue;
 
-        List<T> _maplist = map.keys.toList();
-        for (int j = 0; j < _maplist.length; j++) {
-          var _o = map[_maplist[j]];
+        List<T> _mapList = map.keys.toList();
+        for (int j = 0; j < _mapList.length; j++) {
+          var _o = map[_mapList[j]];
           if (_o is List && _o.length > 0) {
             List<PickerItem> _children = new List<PickerItem<T>>();
             //print('add: ${data.runtimeType.toString()}');
-            data.add(new PickerItem<T>(value: _maplist[j], children: _children));
+            data.add(new PickerItem<T>(value: _mapList[j], children: _children));
             _parsePickerDataItem(_o, _children);
           }
         }
@@ -653,15 +655,18 @@ class NumberPickerColumn {
   final int initValue;
   final int columnFlex;
   final Widget postfix, suffix;
+  final PickerValueFormat<int> onFormatValue;
 
-  NumberPickerColumn(
-      {this.begin = 0,
+  NumberPickerColumn({
+      this.begin = 0,
       this.end = 9,
       this.items,
       this.initValue,
       this.columnFlex = 1,
       this.postfix,
-      this.suffix});
+      this.suffix,
+      this.onFormatValue,
+   });
 
   int indexOf(int value) {
     if (value == null) return -1;
@@ -675,6 +680,10 @@ class NumberPickerColumn {
       return items[index];
     }
     return begin + index;
+  }
+
+  String getValueText(int index) {
+    return onFormatValue == null ? "${valueOf(index)}" : onFormatValue(valueOf(index));
   }
 }
 
@@ -721,16 +730,15 @@ class NumberPickerAdapter extends PickerAdapter<int> {
         if (v < 0) v = 0;
         picker.selecteds.add(v);
       }
-      ;
     }
   }
 
   @override
   Widget buildItem(BuildContext context, int index) {
     if (cur.postfix == null && cur.suffix == null)
-      return makeText(null, "${cur.valueOf(index)}");
+      return makeText(null, cur.getValueText(index));
     else
-      return makeTextEx(null, "${cur.valueOf(index)}", cur.postfix, cur.suffix);
+      return makeTextEx(null, cur.getValueText(index), cur.postfix, cur.suffix);
   }
 
   @override
@@ -768,6 +776,7 @@ class PickerDateTimeType {
   static const int kYMD_AP_HM = 10; // y, m, d, ap, hh, mm
 
   static const int kYM = 11; // y, m
+  static const int kDMY = 12; // d, m, y
 }
 
 class DateTimePickerAdapter extends PickerAdapter<DateTime> {
@@ -776,7 +785,9 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   final List<String> months;
   final List<String> strAMPM;
   final int yearBegin, yearEnd;
-  final String year_suffix, month_suffix, day_suffix;
+  final String yearSuffix, monthSuffix, daySuffix;
+  /// year 0, month 1, day 2, hour 3, minute 4, sec 5, am/pm 6, hour-ap: 7
+  final List<int> customColumnType;
 
   static const List<String> MonthsList_EN = const [
     "Jan",
@@ -817,18 +828,20 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.yearBegin = 1900,
     this.yearEnd = 2100,
     this.value,
-    this.year_suffix,
-    this.month_suffix,
-    this.day_suffix,
+    this.yearSuffix,
+    this.monthSuffix,
+    this.daySuffix,
+    this.customColumnType,
   }) {
     super.picker = picker;
   }
 
   int _col = 0;
-  int _col_ap = -1;
+  int _colAP = -1;
 
   DateTime value;
 
+  // but it can improve the performance, so keep it.
   static const List<List<int>> lengths = const [
     [12, 31, 0],
     [24, 60],
@@ -842,9 +855,21 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [0, 12, 31, 24, 60, 60],
     [0, 12, 31, 2, 12, 60],
     [0, 12],
+    [31, 12, 0],
   ];
 
-  // year 0, month 1, day 2, hour 3, minute 4, sec 5, am/pm 6, hour-ap: 7
+  static const Map<int, int> columnTypeLength = {
+    0: 0,
+    1: 12,
+    2: 31,
+    3: 24,
+    4: 60,
+    5: 60,
+    6: 2,
+    7: 12
+  };
+
+  /// year 0, month 1, day 2, hour 3, minute 4, sec 5, am/pm 6, hour-ap: 7
   static const List<List<int>> columnType = const [
     [1, 2, 0],
     [3, 4],
@@ -858,12 +883,15 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [0, 1, 2, 3, 4, 5],
     [0, 1, 2, 6, 7, 4],
     [0, 1],
+    [2, 1, 0],
   ];
 
   static const List<int> leapYearMonths = const <int>[1, 3, 5, 7, 8, 10, 12];
 
   // 获取当前列的类型
   int getColumnType(int index) {
+    if (customColumnType != null)
+      return customColumnType[index];
     List<int> items = columnType[type];
     if (index >= items.length) return -1;
     return items[index];
@@ -871,7 +899,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
 
   @override
   int getLength() {
-    int v = lengths[type][_col];
+    int v = customColumnType == null ? lengths[type][_col] : columnTypeLength[customColumnType[_col]];
     if (v == 0) return yearEnd - yearBegin;
     if (v == 31) return _calcDateCount(value.year, value.month);
     return v;
@@ -879,32 +907,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
 
   @override
   int getMaxLevel() {
-    switch (type) {
-      case 1:
-        return 2; // hh, mm
-      case 2:
-        return 3; // hh, mm, ss
-      case 3:
-        return 3; // hh, mm, AM/PM
-      case 4:
-        return 5; // m, d, y, hh, mm
-      case 5:
-        return 6; // m, d, y, hh, mm, AM/PM
-      case 6:
-        return 6; // m, d, y, hh, mm, ss
-      case 7:
-        return 3; // y, m, d
-      case 8:
-        return 5; // y, m, d, hh, mm
-      case 9:
-        return 6; // y, m, d, hh, mm, ss
-      case 10:
-        return 6; // y, m, d, ap, hh, mm
-      case 11:
-        return 2; // y, m
-      default:
-        return 3; // m, d, y
-    }
+    return customColumnType == null ? lengths[type].length : customColumnType.length;
   }
 
   @override
@@ -917,7 +920,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   @override
   void initSelects() {
     if (value == null) value = DateTime.now();
-    _col_ap = _getAPColIndex();
+    _colAP = _getAPColIndex();
     int _maxLevel = getMaxLevel();
     if (picker.selecteds == null || picker.selecteds.length == 0) {
       if (picker.selecteds == null) picker.selecteds = new List<int>();
@@ -928,20 +931,20 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   @override
   Widget buildItem(BuildContext context, int index) {
     String _text = "";
-    int coltype = getColumnType(_col);
-    switch (coltype) {
+    int colType = getColumnType(_col);
+    switch (colType) {
       case 0:
-        _text = "${yearBegin + index}${_checkStr(year_suffix)}";
+        _text = "${yearBegin + index}${_checkStr(yearSuffix)}";
         break;
       case 1:
         if (isNumberMonth) {
-          _text = "${index + 1}${_checkStr(month_suffix)}";
+          _text = "${index + 1}${_checkStr(monthSuffix)}";
         } else {
           _text = "${months[index]}";
         }
         break;
       case 2:
-        _text = "${index + 1}${_checkStr(day_suffix)}";
+        _text = "${index + 1}${_checkStr(daySuffix)}";
         break;
       case 3:
       case 4:
@@ -977,8 +980,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   @override
   void doShow() {
     for (int i = 0; i < getMaxLevel(); i++) {
-      int coltype = getColumnType(i);
-      switch (coltype) {
+      int colType = getColumnType(i);
+      switch (colType) {
         case 0:
           picker.selecteds[i] = value.year - yearBegin;
           break;
@@ -1019,8 +1022,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     s = value.second;
     if (type != 2 && type != 6) s = 0;
 
-    int coltype = getColumnType(column);
-    switch (coltype) {
+    int colType = getColumnType(column);
+    switch (colType) {
       case 0:
         year = yearBegin + index;
         break;
@@ -1040,7 +1043,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         s = index;
         break;
       case 6:
-        if (picker.selecteds[_col_ap] == 0) {
+        if (picker.selecteds[_colAP] == 0) {
           if (h == 0) h = 12;
           if (h > 12) h = h - 12;
         } else {
@@ -1050,7 +1053,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         break;
       case 7:
         h = index + 1;
-        if (_col_ap >= 0 && picker.selecteds[_col_ap] == 1) h = h + 12;
+        if (_colAP >= 0 && picker.selecteds[_colAP] == 1) h = h + 12;
         if (h > 23) h = 0;
         break;
     }
@@ -1060,7 +1063,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   }
 
   int _getAPColIndex() {
-    List<int> items = columnType[type];
+    List<int> items = customColumnType ?? columnType[type];
     for (int i = 0; i < items.length; i++) {
       if (items[i] == 6) return i;
     }
@@ -1085,7 +1088,6 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   }
 
   String _checkStr(String v) {
-    if (v == null) return "";
-    return v;
+    return v == null ? "" : v;
   }
 }

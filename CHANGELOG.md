@@ -1,3 +1,9 @@
+## 1.0.3
+
+* Repair Bug.
+* NumberPickerAdapter, data Add onFormatValue property
+* DateTimePickerAdapter, Add customColumnType property, Support custom column order.
+
 ## 1.0.2
 
 * Repair Bug.

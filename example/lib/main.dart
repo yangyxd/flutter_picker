@@ -40,7 +40,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final double listSpec = 8.0;
+  final double listSpec = 4.0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String stateText;
 
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Container(
         padding: EdgeInsets.all(10.0),
         alignment: Alignment.topCenter,
-        child: new Column(
+        child: ListView(
           children: <Widget>[
             (stateText != null) ? Text(stateText) : Container(),
             RaisedButton(
@@ -102,6 +102,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: listSpec),
             RaisedButton(
+              child: Text('Picker Show Number FormatValue'),
+              onPressed: () {
+                showPickerNumberFormatValue(context);
+              },
+            ),
+            SizedBox(height: listSpec),
+            RaisedButton(
               child: Text('Picker Show Date'),
               onPressed: () {
                 showPickerDate(context);
@@ -112,6 +119,13 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text('Picker Show Datetime'),
               onPressed: () {
                 showPickerDateTime(context);
+              },
+            ),
+            SizedBox(height: listSpec),
+            RaisedButton(
+              child: Text('Picker Show Date (Custom)'),
+              onPressed: () {
+                showPickerDateCustom(context);
               },
             ),
             SizedBox(height: listSpec),
@@ -244,6 +258,34 @@ class _MyHomePageState extends State<MyHomePage> {
     ).showDialog(context);
   }
 
+  showPickerNumberFormatValue(BuildContext context) {
+    new Picker(
+        adapter: NumberPickerAdapter(data: [
+          NumberPickerColumn(
+              begin: 0,
+              end: 999,
+              onFormatValue: (v) {
+                return v < 10 ? "0$v" : "$v";
+              }
+          ),
+          NumberPickerColumn(begin: 100, end: 200),
+        ]),
+        delimiter: [
+          PickerDelimiter(child: Container(
+            width: 30.0,
+            alignment: Alignment.center,
+            child: Icon(Icons.more_vert),
+          ))
+        ],
+        hideHeader: true,
+        title: new Text("Please Select"),
+        onConfirm: (Picker picker, List value) {
+          print(value.toString());
+          print(picker.getSelectedValues());
+        }
+    ).showDialog(context);
+  }
+
   showPickerDate(BuildContext context) {
     new Picker(
       hideHeader: true,
@@ -255,15 +297,28 @@ class _MyHomePageState extends State<MyHomePage> {
     ).showDialog(context);
   }
 
+  showPickerDateCustom(BuildContext context) {
+    new Picker(
+        hideHeader: true,
+        adapter: new DateTimePickerAdapter(
+          customColumnType: [2,1,0,3,4],
+        ),
+        title: new Text("Select Data"),
+        onConfirm: (Picker picker, List value) {
+          print((picker.adapter as DateTimePickerAdapter).value);
+        }
+    ).showDialog(context);
+  }
+
   showPickerDateTime(BuildContext context) {
     new Picker(
         adapter: new DateTimePickerAdapter(
           type: PickerDateTimeType.kYMD_AP_HM,
           isNumberMonth: true,
           //strAMPM: const["上午", "下午"],
-          year_suffix: "年",
-          month_suffix: "月",
-          day_suffix: "日"
+          yearSuffix: "年",
+          monthSuffix: "月",
+          daySuffix: "日"
         ),
         title: new Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {
@@ -282,9 +337,9 @@ class _MyHomePageState extends State<MyHomePage> {
         adapter: new DateTimePickerAdapter(
             type: PickerDateTimeType.kMDYHM,
             isNumberMonth: true,
-            year_suffix: "年",
-            month_suffix: "月",
-            day_suffix: "日"
+            yearSuffix: "年",
+            monthSuffix: "月",
+            daySuffix: "日"
         ),
         title: new Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {
