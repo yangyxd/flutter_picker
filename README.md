@@ -1,6 +1,6 @@
 # flutter_picker
 
-Flutter plugin picker.
+Flutter plugin picker. Include NumberPicker, DateTimePicker, ArrayPicker, and default linkage Picker. Provide flexible parameters to meet various needs. At the same time, you can extend more functions through custom adapters.
 
 > Supported  Platforms
 > * Android
