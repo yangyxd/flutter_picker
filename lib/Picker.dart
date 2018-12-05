@@ -2,12 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/src/material/dialog.dart' as Dialog;
 import 'package:flutter/material.dart';
 
+/// Picker selected callback.
 typedef PickerSelectedCallback = void Function(
     Picker picker, int index, List<int> selecteds);
+/// Picker confirm callback.
 typedef PickerConfirmCallback = void Function(
     Picker picker, List<int> selecteds);
+/// Picker value format callback.
 typedef PickerValueFormat<T> = String Function(T value);
 
+/// localizations
 class PickerLocalizations {
   static const Map<String, Map<String, Object>> localizedValues = {
     'en': {
@@ -45,7 +49,7 @@ class PickerLocalizations {
 }
 
 
-/// 选择器
+/// Picker
 class Picker {
   static const double DefaultTextSize = 20.0;
 
@@ -129,6 +133,7 @@ class Picker {
         });
   }
 
+  /// show dialog picker
   void showDialog(BuildContext context) {
     List<Widget> actions = [];
     String _cancelText =
@@ -177,6 +182,7 @@ class PickerDelimiter {
   PickerDelimiter({this.child, this.column = 1}) : assert(child != null);
 }
 
+/// picker data list item
 class PickerItem<T> {
   /// 显示内容
   final Widget text;
