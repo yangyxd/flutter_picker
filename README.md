@@ -1,5 +1,9 @@
 # flutter_picker
 
+[![pub package](https://img.shields.io/pub/v/flutter_picker.svg)](https://pub.dartlang.org/packages/flutter_picker)
+![GitHub](https://img.shields.io/github/license/yangyxd/flutter_picker.svg)
+[![GitHub stars](https://img.shields.io/github/stars/yangyxd/flutter_picker.svg?style=social&label=Stars)](https://github.com/yangyxd/flutter_picker)
+
 Flutter plugin picker. Include NumberPicker, DateTimePicker, ArrayPicker, and default linkage Picker. Provide flexible parameters to meet various needs. At the same time, you can extend more functions through custom adapters.
 
 > Supported  Platforms
