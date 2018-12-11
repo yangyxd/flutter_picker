@@ -81,13 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: listSpec),
             RaisedButton(
-              child: Text('Picker Show Dialog'),
-              onPressed: () {
-                showPickerDialog(context);
-              },
-            ),
-            SizedBox(height: listSpec),
-            RaisedButton(
               child: Text('Picker Show (Array)'),
               onPressed: () {
                 showPickerArray(context);
@@ -208,9 +201,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
-        }
+        },
     ).show(_scaffoldKey.currentState);
   }
+
 
   showPickerDialog(BuildContext context) {
     new Picker(
@@ -226,8 +220,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   showPickerArray(BuildContext context) {
     new Picker(
-        adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData2), isArray: true),
+        adapter: PickerDataAdapter<String>(
+            pickerdata: new JsonDecoder().convert(PickerData2),
+            isArray: true,
+        ),
         hideHeader: true,
+        selecteds: [3, 0, 2],
         title: new Text("Please Select"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());

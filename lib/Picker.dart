@@ -75,6 +75,7 @@ class Picker {
   final EdgeInsetsGeometry columnPadding;
   final Color backgroundColor, headercolor, containerColor;
   final bool hideHeader;
+  final bool looping;
 
   Widget _widget;
   PickerWidgetState _state;
@@ -98,6 +99,7 @@ class Picker {
       this.headercolor,
       this.changeToFirst = false,
       this.hideHeader = false,
+      this.looping = false,
       this.columnFlex,
       this.onCancel,
       this.onSelect,
@@ -341,6 +343,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
               backgroundColor: picker.backgroundColor,
               scrollController: scrollController[i],
               itemExtent: picker.itemExtent,
+              looping: picker.looping,
               onSelectedItemChanged: (int index) {
                 print("onSelectedItemChanged");
                 setState(() {
@@ -387,8 +390,11 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     if (_changeing || !picker.adapter.isLinkage) return;
     _changeing = true;
     for (int j = 0; j < picker.selecteds.length; j++) {
-      if (j != i)
+      if (j != i) {
+        if (scrollController[j].position.maxScrollExtent == null)
+          continue;
         scrollController[j].position.notifyListeners();
+      }
     }
     _changeing = false;
   }
