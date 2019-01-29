@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/src/material/dialog.dart' as Dialog;
 import 'package:flutter/material.dart';
 
+const bool __printDebug = false;
+
 /// Picker selected callback.
 typedef PickerSelectedCallback = void Function(
     Picker picker, int index, List<int> selecteds);
@@ -313,7 +315,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   final Map<int, int> lastData = new Map<int, int>();
 
   List<Widget> _buildViews() {
-    print("_buildViews");
+    if (__printDebug) print("_buildViews");
     if (theme == null) theme = Theme.of(context);
 
     List<Widget> items = [];
@@ -345,7 +347,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
               itemExtent: picker.itemExtent,
               looping: picker.looping,
               onSelectedItemChanged: (int index) {
-                print("onSelectedItemChanged");
+                if (__printDebug) print("onSelectedItemChanged");
                 setState(() {
                   picker.selecteds[i] = index;
                   updateScrollController(i);
@@ -542,7 +544,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
         }
       }
     }
-    print("data.length: ${data.length}");
+    if (__printDebug) print("data.length: ${data.length}");
   }
 
   _parsePickerDataItem(List pickerData, List<PickerItem> data) {
@@ -575,7 +577,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
 
   void setColumn(int index) {
     if (isArray) {
-      print("index: $index");
+      if (__printDebug) print("index: $index");
       if (index + 1 < data.length)
         _datas = data[index + 1].children;
       else
