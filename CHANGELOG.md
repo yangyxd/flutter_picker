@@ -1,3 +1,7 @@
+## 1.0.7
+
+* Add korea locale
+
 ## 1.0.6
 
 * Remove debugging output information
