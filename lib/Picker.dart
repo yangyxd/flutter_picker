@@ -144,32 +144,30 @@ class Picker {
 
   /// show dialog picker
   void showDialog(BuildContext context) {
-    List<Widget> actions = [];
-    String _cancelText =
-        cancelText ?? PickerLocalizations.of(context).cancelText;
-    String _confirmText =
-        confirmText ?? PickerLocalizations.of(context).confirmText;
-
-    if (_cancelText != null && _cancelText != "") {
-      actions.add(new FlatButton(
-          onPressed: () {
-            Navigator.pop(context);
-            if (onCancel != null) onCancel();
-          },
-          child: new Text(_cancelText)));
-    }
-    if (_confirmText != null && _confirmText != "") {
-      actions.add(new FlatButton(
-          onPressed: () {
-            Navigator.pop(context);
-            if (onConfirm != null) onConfirm(this, selecteds);
-          },
-          child: new Text(_confirmText)));
-    }
-
     Dialog.showDialog(
         context: context,
         builder: (BuildContext context) {
+          List<Widget> actions = [];
+          String _cancelText = cancelText ?? PickerLocalizations.of(context).cancelText;
+          String _confirmText = confirmText ?? PickerLocalizations.of(context).confirmText;
+
+          if (_cancelText != null && _cancelText != "") {
+            actions.add(new FlatButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (onCancel != null) onCancel();
+                },
+                child: new Text(_cancelText)));
+          }
+          if (_confirmText != null && _confirmText != "") {
+            actions.add(new FlatButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (onConfirm != null) onConfirm(this, selecteds);
+                },
+                child: new Text(_confirmText)));
+          }
+
           return new AlertDialog(
             title: title,
             actions: actions,
