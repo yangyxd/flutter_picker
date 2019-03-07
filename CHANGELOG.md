@@ -1,3 +1,7 @@
+## 1.0.8
+
+* Repair Bug: showDialog
+
 ## 1.0.7
 
 * Add korea locale

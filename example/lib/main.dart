@@ -146,6 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
       adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       textAlign: TextAlign.left,
+      textStyle: const TextStyle(color: Colors.blue),
       columnPadding: const EdgeInsets.all(8.0),
       onConfirm: (Picker picker, List value) {
         print(value.toString());
