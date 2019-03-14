@@ -1,3 +1,7 @@
+## 1.0.9
+
+* Add the ability to jump numbers in NumberPickerColumn (thank: @jesusrp98)
+
 ## 1.0.8
 
 * Repair Bug: showDialog

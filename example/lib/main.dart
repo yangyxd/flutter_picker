@@ -142,8 +142,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPicker(BuildContext context) {
-    Picker picker = new Picker(
-      adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData)),
+    Picker picker = Picker(
+      adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       textAlign: TextAlign.left,
       textStyle: const TextStyle(color: Colors.blue),
@@ -157,8 +157,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerModal(BuildContext context) {
-    new Picker(
-      adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData)),
+    Picker(
+      adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       hideHeader: false,
       onConfirm: (Picker picker, List value) {
@@ -169,36 +169,36 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerIcons(BuildContext context) {
-    new Picker(
+    Picker(
         adapter: PickerDataAdapter(data: [
-          new PickerItem(text: Icon(Icons.add), value: Icons.add, children: [
-            new PickerItem(text: Icon(Icons.more)),
-            new PickerItem(text: Icon(Icons.aspect_ratio)),
-            new PickerItem(text: Icon(Icons.android)),
-            new PickerItem(text: Icon(Icons.menu)),
+          PickerItem(text: Icon(Icons.add), value: Icons.add, children: [
+            PickerItem(text: Icon(Icons.more)),
+            PickerItem(text: Icon(Icons.aspect_ratio)),
+            PickerItem(text: Icon(Icons.android)),
+            PickerItem(text: Icon(Icons.menu)),
           ]),
-          new PickerItem(text: Icon(Icons.title), value: Icons.title, children: [
-            new PickerItem(text: Icon(Icons.more_vert)),
-            new PickerItem(text: Icon(Icons.ac_unit)),
-            new PickerItem(text: Icon(Icons.access_alarm)),
-            new PickerItem(text: Icon(Icons.account_balance)),
+          PickerItem(text: Icon(Icons.title), value: Icons.title, children: [
+            PickerItem(text: Icon(Icons.more_vert)),
+            PickerItem(text: Icon(Icons.ac_unit)),
+            PickerItem(text: Icon(Icons.access_alarm)),
+            PickerItem(text: Icon(Icons.account_balance)),
           ]),
-          new PickerItem(text: Icon(Icons.face), value: Icons.face, children: [
-            new PickerItem(text: Icon(Icons.add_circle_outline)),
-            new PickerItem(text: Icon(Icons.add_a_photo)),
-            new PickerItem(text: Icon(Icons.access_time)),
-            new PickerItem(text: Icon(Icons.adjust)),
+          PickerItem(text: Icon(Icons.face), value: Icons.face, children: [
+            PickerItem(text: Icon(Icons.add_circle_outline)),
+            PickerItem(text: Icon(Icons.add_a_photo)),
+            PickerItem(text: Icon(Icons.access_time)),
+            PickerItem(text: Icon(Icons.adjust)),
           ]),
-          new PickerItem(text: Icon(Icons.linear_scale), value: Icons.linear_scale, children: [
-            new PickerItem(text: Icon(Icons.assistant_photo)),
-            new PickerItem(text: Icon(Icons.account_balance)),
-            new PickerItem(text: Icon(Icons.airline_seat_legroom_extra)),
-            new PickerItem(text: Icon(Icons.airport_shuttle)),
-            new PickerItem(text: Icon(Icons.settings_bluetooth)),
+          PickerItem(text: Icon(Icons.linear_scale), value: Icons.linear_scale, children: [
+            PickerItem(text: Icon(Icons.assistant_photo)),
+            PickerItem(text: Icon(Icons.account_balance)),
+            PickerItem(text: Icon(Icons.airline_seat_legroom_extra)),
+            PickerItem(text: Icon(Icons.airport_shuttle)),
+            PickerItem(text: Icon(Icons.settings_bluetooth)),
           ]),
-          new PickerItem(text: Icon(Icons.close), value: Icons.close),
+          PickerItem(text: Icon(Icons.close), value: Icons.close),
         ]),
-        title: new Text("Select Icon"),
+        title: Text("Select Icon"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -208,8 +208,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   showPickerDialog(BuildContext context) {
-    new Picker(
-        adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(PickerData)),
+    Picker(
+        adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
         hideHeader: true,
         title: new Text("Select Data"),
         onConfirm: (Picker picker, List value) {
@@ -220,14 +220,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerArray(BuildContext context) {
-    new Picker(
+    Picker(
         adapter: PickerDataAdapter<String>(
-            pickerdata: new JsonDecoder().convert(PickerData2),
+            pickerdata: JsonDecoder().convert(PickerData2),
             isArray: true,
         ),
         hideHeader: true,
         selecteds: [3, 0, 2],
-        title: new Text("Please Select"),
+        title: Text("Please Select"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -236,10 +236,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerNumber(BuildContext context) {
-    new Picker(
+    Picker(
         adapter: NumberPickerAdapter(data: [
           NumberPickerColumn(begin: 0, end: 999, postfix: Text("\$"), suffix: Icon(Icons.insert_emoticon)),
-          NumberPickerColumn(begin: 100, end: 200),
+          NumberPickerColumn(begin: 200, end: 100, jump: -10),
         ]),
         delimiter: [
           PickerDelimiter(child: Container(
@@ -249,7 +249,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ))
         ],
         hideHeader: true,
-        title: new Text("Please Select"),
+        title: Text("Please Select"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -258,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerNumberFormatValue(BuildContext context) {
-    new Picker(
+    Picker(
         adapter: NumberPickerAdapter(data: [
           NumberPickerColumn(
               begin: 0,
@@ -277,7 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ))
         ],
         hideHeader: true,
-        title: new Text("Please Select"),
+        title: Text("Please Select"),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -286,10 +286,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerDate(BuildContext context) {
-    new Picker(
+    Picker(
       hideHeader: true,
-      adapter: new DateTimePickerAdapter(),
-      title: new Text("Select Data"),
+      adapter: DateTimePickerAdapter(),
+      title: Text("Select Data"),
       onConfirm: (Picker picker, List value) {
         print((picker.adapter as DateTimePickerAdapter).value);
       }

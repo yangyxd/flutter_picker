@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/src/material/dialog.dart' as Dialog;
 import 'package:flutter/material.dart';
+import 'package:flutter/src/material/dialog.dart' as Dialog;
 
 const bool __printDebug = false;
 
@@ -122,7 +122,7 @@ class Picker {
     _maxLevel = adapter.maxLevel;
     adapter.picker = this;
     adapter.initSelects();
-    _widget = new _PickerWidget(picker: this, themeData: themeData);
+    _widget = _PickerWidget(picker: this, themeData: themeData);
     return _widget;
   }
 
@@ -152,23 +152,23 @@ class Picker {
           String _confirmText = confirmText ?? PickerLocalizations.of(context).confirmText;
 
           if (_cancelText != null && _cancelText != "") {
-            actions.add(new FlatButton(
+            actions.add(FlatButton(
                 onPressed: () {
                   Navigator.pop(context);
                   if (onCancel != null) onCancel();
                 },
-                child: new Text(_cancelText)));
+                child: Text(_cancelText)));
           }
           if (_confirmText != null && _confirmText != "") {
-            actions.add(new FlatButton(
+            actions.add(FlatButton(
                 onPressed: () {
                   Navigator.pop(context);
                   if (onConfirm != null) onConfirm(this, selecteds);
                 },
-                child: new Text(_confirmText)));
+                child: Text(_confirmText)));
           }
 
-          return new AlertDialog(
+          return AlertDialog(
             title: title,
             actions: actions,
             content: makePicker(),
@@ -211,7 +211,7 @@ class _PickerWidget<T> extends StatefulWidget {
 
   @override
   PickerWidgetState createState() =>
-      new PickerWidgetState<T>(picker: this.picker, themeData: this.themeData);
+      PickerWidgetState<T>(picker: this.picker, themeData: this.themeData);
 }
 
 class PickerWidgetState<T> extends State<_PickerWidget> {
@@ -232,7 +232,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     if (scrollController.length == 0) {
       for (int i = 0; i < picker._maxLevel; i++)
         scrollController.add(
-            new FixedExtentScrollController(initialItem: picker.selecteds[i]));
+            FixedExtentScrollController(initialItem: picker.selecteds[i]));
     }
   }
 
@@ -248,7 +248,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                   children: _buildHeaderViews(),
                 ),
                 decoration: BoxDecoration(
-                  border: new Border(
+                  border: Border(
                       top: BorderSide(color: theme.dividerColor, width: 0.5)),
                   color: picker.headercolor == null
                       ? theme.bottomAppBarColor
@@ -272,42 +272,42 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
         picker.confirmText ?? PickerLocalizations.of(context).confirmText;
 
     if (_cancelText != null || _cancelText != "") {
-      items.add(new FlatButton(
+      items.add(FlatButton(
           onPressed: () {
             if (picker.onCancel != null) picker.onCancel();
             Navigator.of(context).pop();
             picker._widget = null;
           },
-          child: new Text(_cancelText,
+          child: Text(_cancelText,
               overflow: TextOverflow.ellipsis,
               style: picker.cancelTextStyle ??
-                  new TextStyle(
+                  TextStyle(
                       color: theme.accentColor,
                       fontSize: Picker.DefaultTextSize))));
     }
-    items.add(new Expanded(
-        child: new Container(
+    items.add(Expanded(
+        child: Container(
       alignment: Alignment.center,
       child: picker.title == null
           ? picker.title
-          : new DefaultTextStyle(
+          : DefaultTextStyle(
               style: TextStyle(
                   fontSize: Picker.DefaultTextSize,
                   color: theme.textTheme.title.color),
               child: picker.title),
     )));
     if (_confirmText != null || _confirmText != "") {
-      items.add(new FlatButton(
+      items.add(FlatButton(
           onPressed: () {
             if (picker.onConfirm != null)
               picker.onConfirm(picker, picker.selecteds);
             Navigator.of(context).pop();
             picker._widget = null;
           },
-          child: new Text(_confirmText,
+          child: Text(_confirmText,
               overflow: TextOverflow.ellipsis,
               style: picker.confirmTextStyle ??
-                  new TextStyle(
+                  TextStyle(
                       color: theme.accentColor,
                       fontSize: Picker.DefaultTextSize))));
     }
@@ -315,7 +315,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   }
 
   bool _changeing = false;
-  final Map<int, int> lastData = new Map<int, int>();
+  final Map<int, int> lastData = {};
 
   List<Widget> _buildViews() {
     if (__printDebug) print("_buildViews");
@@ -671,36 +671,44 @@ class NumberPickerColumn {
   final int end;
   final int initValue;
   final int columnFlex;
+  final int jump;
   final Widget postfix, suffix;
   final PickerValueFormat<int> onFormatValue;
 
-  NumberPickerColumn({
+  const NumberPickerColumn({
       this.begin = 0,
       this.end = 9,
       this.items,
       this.initValue,
+      this.jump = 1,
       this.columnFlex = 1,
       this.postfix,
       this.suffix,
       this.onFormatValue,
-   });
+   }) : assert(jump != null);
 
   int indexOf(int value) {
     if (value == null) return -1;
     if (items != null) return items.indexOf(value);
     if (value < begin || value > end) return -1;
-    return value - begin;
+    return (value - begin) ~/ (this.jump == 0 ? 1 : this.jump);
   }
 
   int valueOf(int index) {
     if (items != null) {
       return items[index];
     }
-    return begin + index;
+    return begin + index * (this.jump == 0 ? 1 : this.jump);
   }
 
   String getValueText(int index) {
     return onFormatValue == null ? "${valueOf(index)}" : onFormatValue(valueOf(index));
+  }
+
+  int count() {
+    var v = (end - begin) ~/ (this.jump == 0 ? 1 : this.jump) + 1;
+    if (v < 1) return 0;
+    return v;
   }
 }
 
@@ -714,9 +722,7 @@ class NumberPickerAdapter extends PickerAdapter<int> {
   int getLength() {
     if (cur == null) return 0;
     if (cur.items != null) return cur.items.length;
-    int v = cur.end - cur.begin + 1;
-    if (v < 1) return 0;
-    return v;
+    return cur.count();
   }
 
   @override
