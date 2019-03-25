@@ -31,6 +31,11 @@ class PickerLocalizations {
       'confirmText': '확인',
       'ampm': ['오전', '오후'],
     },
+    'it': {
+      'cancelText': 'Annulla',
+      'confirmText': 'Conferma',
+      'ampm': ['AM', 'PM'],
+    },
   };
 
   static PickerLocalizations _static = const PickerLocalizations(null);

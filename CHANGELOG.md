@@ -2,6 +2,7 @@
 
 * Solving #25 Problem  
 * Add attributes: headerDecoration, Can be used to control header borders.
+* Add Italian locale.
 
 ## 1.0.9
 
