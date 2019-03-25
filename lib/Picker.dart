@@ -84,6 +84,8 @@ class Picker {
   final bool hideHeader;
   final bool looping;
 
+  final Decoration headerDecoration;
+
   Widget _widget;
   PickerWidgetState _state;
 
@@ -107,6 +109,7 @@ class Picker {
       this.changeToFirst = false,
       this.hideHeader = false,
       this.looping = false,
+      this.headerDecoration,
       this.columnFlex,
       this.onCancel,
       this.onSelect,
@@ -118,11 +121,11 @@ class Picker {
   int _maxLevel = 1;
 
   /// 生成picker控件
-  Widget makePicker([ThemeData themeData]) {
+  Widget makePicker([ThemeData themeData, bool isModal = false]) {
     _maxLevel = adapter.maxLevel;
     adapter.picker = this;
     adapter.initSelects();
-    _widget = _PickerWidget(picker: this, themeData: themeData);
+    _widget = _PickerWidget(picker: this, themeData: themeData, isModal: isModal);
     return _widget;
   }
 
@@ -138,7 +141,7 @@ class Picker {
     showModalBottomSheet(
         context: context, //state.context,
         builder: (BuildContext context) {
-          return makePicker(themeData);
+          return makePicker(themeData, true);
         });
   }
 
@@ -206,7 +209,8 @@ class PickerItem<T> {
 class _PickerWidget<T> extends StatefulWidget {
   final Picker picker;
   final ThemeData themeData;
-  _PickerWidget({Key key, @required this.picker, @required this.themeData})
+  final bool isModal;
+  _PickerWidget({Key key, @required this.picker, @required this.themeData, this.isModal})
       : super(key: key);
 
   @override
@@ -238,28 +242,34 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    var v = Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         (picker.hideHeader)
             ? SizedBox()
             : Container(
-                child: Row(
-                  children: _buildHeaderViews(),
-                ),
-                decoration: BoxDecoration(
-                  border: Border(
-                      top: BorderSide(color: theme.dividerColor, width: 0.5)),
-                  color: picker.headercolor == null
-                      ? theme.bottomAppBarColor
-                      : picker.headercolor,
-                ),
-              ),
+          child: Row(
+            children: _buildHeaderViews(),
+          ),
+          decoration: picker.headerDecoration ?? BoxDecoration(
+            border: Border(
+                top: BorderSide(color: theme.dividerColor, width: 0.5)),
+            color: picker.headercolor == null
+                ? theme.bottomAppBarColor
+                : picker.headercolor,
+          ),
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: _buildViews(),
         ),
       ],
+    );
+    if (widget.isModal == null || widget.isModal == false)
+      return v;
+    return GestureDetector(
+      onTap: () {},
+      child: v,
     );
   }
 

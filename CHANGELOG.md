@@ -1,3 +1,8 @@
+## 1.0.10
+
+* Solving #25 Problem  
+* Add attributes: headerDecoration, Can be used to control header borders.
+
 ## 1.0.9
 
 * Add the ability to jump numbers in NumberPickerColumn (thank: @jesusrp98)
