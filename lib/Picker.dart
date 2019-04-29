@@ -36,6 +36,11 @@ class PickerLocalizations {
       'confirmText': 'Conferma',
       'ampm': ['AM', 'PM'],
     },
+    'ar':{
+      'cancelText': 'إلغاء الأمر',
+      'confirmText': 'تأكيد',
+      'ampm': ['صباحاً', 'مساءً'],
+    },
   };
 
   static PickerLocalizations _static = const PickerLocalizations(null);
@@ -78,6 +83,8 @@ class Picker {
   final List<int> columnFlex;
 
   final Widget title;
+  final Widget cancel;
+  final Widget confirm;
   final String cancelText;
   final String confirmText;
 
@@ -106,6 +113,8 @@ class Picker {
       this.confirmTextStyle,
       this.textAlign = TextAlign.start,
       this.title,
+      this.cancel,
+      this.confirm,
       this.cancelText,
       this.confirmText,
       this.backgroundColor = Colors.white,
@@ -156,24 +165,33 @@ class Picker {
         context: context,
         builder: (BuildContext context) {
           List<Widget> actions = [];
-          String _cancelText = cancelText ?? PickerLocalizations.of(context).cancelText;
-          String _confirmText = confirmText ?? PickerLocalizations.of(context).confirmText;
 
-          if (_cancelText != null && _cancelText != "") {
-            actions.add(FlatButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  if (onCancel != null) onCancel();
-                },
-                child: Text(_cancelText)));
+          if (cancel == null) {
+            String _cancelText = cancelText ?? PickerLocalizations.of(context).cancelText;
+            if (_cancelText != null && _cancelText != "") {
+              actions.add(FlatButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    if (onCancel != null) onCancel();
+                  },
+                  child: Text(_cancelText)));
+            }
+          } else {
+            actions.add(cancel);
           }
-          if (_confirmText != null && _confirmText != "") {
-            actions.add(FlatButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  if (onConfirm != null) onConfirm(this, selecteds);
-                },
-                child: Text(_confirmText)));
+
+          if (confirm == null) {
+            String _confirmText = confirmText ?? PickerLocalizations.of(context).confirmText;
+            if (_confirmText != null && _confirmText != "") {
+              actions.add(FlatButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    if (onConfirm != null) onConfirm(this, selecteds);
+                  },
+                  child: Text(_confirmText)));
+            }
+          } else {
+            actions.add(confirm);
           }
 
           return AlertDialog(
@@ -188,6 +206,22 @@ class Picker {
   List getSelectedValues() {
     return adapter.getSelectedValues();
   }
+
+  /// 取消
+  void doCancel(BuildContext context) {
+    if (onCancel != null) onCancel();
+    Navigator.of(context).pop();
+    _widget = null;
+  }
+
+  /// 确定
+  void doConfirm(BuildContext context) {
+    if (onConfirm != null)
+      onConfirm(this, selecteds);
+    Navigator.of(context).pop();
+    _widget = null;
+  }
+
 }
 
 /// 分隔符
@@ -281,51 +315,60 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   List<Widget> _buildHeaderViews() {
     if (theme == null) theme = Theme.of(context);
     List<Widget> items = [];
-    String _cancelText =
-        picker.cancelText ?? PickerLocalizations.of(context).cancelText;
-    String _confirmText =
-        picker.confirmText ?? PickerLocalizations.of(context).confirmText;
 
-    if (_cancelText != null || _cancelText != "") {
-      items.add(FlatButton(
-          onPressed: () {
-            if (picker.onCancel != null) picker.onCancel();
-            Navigator.of(context).pop();
-            picker._widget = null;
-          },
-          child: Text(_cancelText,
-              overflow: TextOverflow.ellipsis,
-              style: picker.cancelTextStyle ??
-                  TextStyle(
-                      color: theme.accentColor,
-                      fontSize: Picker.DefaultTextSize))));
+    if (picker.cancel != null) {
+      items.add(DefaultTextStyle(style: picker.cancelTextStyle ?? TextStyle(
+          color: theme.accentColor, fontSize: Picker.DefaultTextSize
+      ), child: picker.cancel));
+    } else {
+      String _cancelText = picker.cancelText ?? PickerLocalizations.of(context).cancelText;
+      if (_cancelText != null || _cancelText != "") {
+        items.add(FlatButton(
+            onPressed: () {
+              picker.doCancel(context);
+            },
+            child: Text(_cancelText, overflow: TextOverflow.ellipsis,
+                style: picker.cancelTextStyle ?? TextStyle(
+                    color: theme.accentColor, fontSize: Picker.DefaultTextSize
+                )
+            )
+        ));
+      }
     }
+
     items.add(Expanded(
         child: Container(
-      alignment: Alignment.center,
-      child: picker.title == null
-          ? picker.title
-          : DefaultTextStyle(
+          alignment: Alignment.center,
+          child: picker.title == null
+              ? picker.title
+              : DefaultTextStyle(
               style: TextStyle(
                   fontSize: Picker.DefaultTextSize,
                   color: theme.textTheme.title.color),
               child: picker.title),
-    )));
-    if (_confirmText != null || _confirmText != "") {
-      items.add(FlatButton(
-          onPressed: () {
-            if (picker.onConfirm != null)
-              picker.onConfirm(picker, picker.selecteds);
-            Navigator.of(context).pop();
-            picker._widget = null;
-          },
-          child: Text(_confirmText,
-              overflow: TextOverflow.ellipsis,
-              style: picker.confirmTextStyle ??
-                  TextStyle(
-                      color: theme.accentColor,
-                      fontSize: Picker.DefaultTextSize))));
+        )));
+
+
+    if (picker.confirm != null) {
+      items.add(DefaultTextStyle(style: picker.confirmTextStyle ?? TextStyle(
+          color: theme.accentColor, fontSize: Picker.DefaultTextSize
+      ), child: picker.confirm));
+    } else {
+      String _confirmText = picker.confirmText ?? PickerLocalizations.of(context).confirmText;
+      if (_confirmText != null || _confirmText != "") {
+        items.add(FlatButton(
+            onPressed: () {
+              picker.doConfirm(context);
+            },
+            child: Text(_confirmText,
+                overflow: TextOverflow.ellipsis,
+                style: picker.confirmTextStyle ??
+                    TextStyle(
+                        color: theme.accentColor,
+                        fontSize: Picker.DefaultTextSize))));
+      }
     }
+
     return items;
   }
 
@@ -823,6 +866,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   final List<String> months;
   final List<String> strAMPM;
   final int yearBegin, yearEnd;
+  final DateTime minValue, maxValue;
   final String yearSuffix, monthSuffix, daySuffix;
   /// year 0, month 1, day 2, hour 3, minute 4, sec 5, am/pm 6, hour-ap: 7
   final List<int> customColumnType;
@@ -866,6 +910,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.yearBegin = 1900,
     this.yearEnd = 2100,
     this.value,
+    this.minValue,
+    this.maxValue,
     this.yearSuffix,
     this.monthSuffix,
     this.daySuffix,
@@ -938,7 +984,15 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   @override
   int getLength() {
     int v = customColumnType == null ? lengths[type][_col] : columnTypeLength[customColumnType[_col]];
-    if (v == 0) return yearEnd - yearBegin;
+    if (v == 0) {
+      int ye = yearEnd;
+      int yb = yearBegin;
+      if (minValue != null)
+        ye = minValue.year;
+      if (maxValue != null)
+        yb = maxValue.year;
+      return ye - yb;
+    }
     if (v == 31) return _calcDateCount(value.year, value.month);
     return v;
   }
@@ -1098,6 +1152,15 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     int cday = _calcDateCount(year, month);
     if (day > cday) day = cday;
     value = new DateTime(year, month, day, h, m, s);
+
+    if (minValue != null && (value.millisecondsSinceEpoch < minValue.millisecondsSinceEpoch)) {
+      value = minValue;
+      notifyDataChanged();
+    } else if (maxValue != null && value.millisecondsSinceEpoch > maxValue.millisecondsSinceEpoch) {
+      value = maxValue;
+      notifyDataChanged();
+    }
+
   }
 
   int _getAPColIndex() {

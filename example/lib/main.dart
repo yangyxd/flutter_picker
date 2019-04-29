@@ -228,6 +228,9 @@ class _MyHomePageState extends State<MyHomePage> {
         hideHeader: true,
         selecteds: [3, 0, 2],
         title: Text("Please Select"),
+        cancel: FlatButton(onPressed: () {
+          Navigator.pop(context);
+        }, child: Icon(Icons.child_care)),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -317,7 +320,8 @@ class _MyHomePageState extends State<MyHomePage> {
           //strAMPM: const["上午", "下午"],
           yearSuffix: "年",
           monthSuffix: "月",
-          daySuffix: "日"
+          daySuffix: "日",
+          minValue: DateTime.now(),
         ),
         title: new Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {

@@ -1,3 +1,9 @@
+## 1.0.11
+
+* Add localization for Arabic language
+* Add parameter: cancel and confirm,  Allow yourself to specify widgets to be placed in the identified and cancelled locations
+* DateTimePickerAdapter supports minValue and maxValue, which are used to limit the upper and lower bounds for selecting date and time.
+
 ## 1.0.10
 
 * Solving #25 Problem  
