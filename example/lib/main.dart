@@ -322,29 +322,10 @@ class _MyHomePageState extends State<MyHomePage> {
           monthSuffix: "月",
           daySuffix: "日",
           minValue: DateTime.now(),
+          // twoDigitYear: true,
         ),
         title: new Text("Select DateTime"),
-        onConfirm: (Picker picker, List value) {
-          print(picker.adapter.text);
-        },
-        onSelect: (Picker picker, int index, List<int> selecteds) {
-          this.setState(() {
-            stateText = picker.adapter.toString();
-          });
-        }
-    ).show(_scaffoldKey.currentState);
-  }
-
-  showPickerDateTime24(BuildContext context) {
-    new Picker(
-        adapter: new DateTimePickerAdapter(
-            type: PickerDateTimeType.kMDYHM,
-            isNumberMonth: true,
-            yearSuffix: "年",
-            monthSuffix: "月",
-            daySuffix: "日"
-        ),
-        title: new Text("Select DateTime"),
+        textAlign: TextAlign.right,
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         },
@@ -410,6 +391,27 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           );
         });
+  }
+
+  showPickerDateTime24(BuildContext context) {
+    new Picker(
+        adapter: new DateTimePickerAdapter(
+            type: PickerDateTimeType.kMDYHM,
+            isNumberMonth: true,
+            yearSuffix: "年",
+            monthSuffix: "月",
+            daySuffix: "日"
+        ),
+        title: new Text("Select DateTime"),
+        onConfirm: (Picker picker, List value) {
+          print(picker.adapter.text);
+        },
+        onSelect: (Picker picker, int index, List<int> selecteds) {
+          this.setState(() {
+            stateText = picker.adapter.toString();
+          });
+        }
+    ).show(_scaffoldKey.currentState);
   }
 
 }

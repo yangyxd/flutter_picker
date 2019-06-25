@@ -91,6 +91,7 @@ class Picker {
   final double height, itemExtent;
   final TextStyle textStyle, cancelTextStyle, confirmTextStyle;
   final TextAlign textAlign;
+  final double textScaleFactor;
   final EdgeInsetsGeometry columnPadding;
   final Color backgroundColor, headercolor, containerColor;
   final bool hideHeader;
@@ -112,6 +113,7 @@ class Picker {
       this.cancelTextStyle,
       this.confirmTextStyle,
       this.textAlign = TextAlign.start,
+      this.textScaleFactor,
       this.title,
       this.cancel,
       this.confirm,
@@ -483,7 +485,7 @@ abstract class PickerAdapter<T> {
             style: picker.textStyle ??
                 new TextStyle(
                     color: Colors.black87, fontSize: Picker.DefaultTextSize),
-            child: child ?? new Text(text)
+            child: child ?? new Text(text, textScaleFactor: picker.textScaleFactor)
         )
     );
   }
@@ -868,6 +870,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   final int yearBegin, yearEnd;
   final DateTime minValue, maxValue;
   final String yearSuffix, monthSuffix, daySuffix;
+  /// use two-digit year, 2019, displayed as 19
+  final bool twoDigitYear;
   /// year 0, month 1, day 2, hour 3, minute 4, sec 5, am/pm 6, hour-ap: 7
   final List<int> customColumnType;
 
@@ -916,12 +920,18 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.monthSuffix,
     this.daySuffix,
     this.customColumnType,
+    this.twoDigitYear = false,
   }) {
     super.picker = picker;
+    _yearBegin = yearBegin;
+    if (minValue != null && minValue.year > _yearBegin) {
+      _yearBegin = minValue.year;
+    }
   }
 
   int _col = 0;
   int _colAP = -1;
+  int _yearBegin = 0;
 
   DateTime value;
 
@@ -986,12 +996,9 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     int v = customColumnType == null ? lengths[type][_col] : columnTypeLength[customColumnType[_col]];
     if (v == 0) {
       int ye = yearEnd;
-      int yb = yearBegin;
-      if (minValue != null)
-        ye = minValue.year;
       if (maxValue != null)
-        yb = maxValue.year;
-      return ye - yb;
+        ye = maxValue.year;
+      return ye - _yearBegin + 1;
     }
     if (v == 31) return _calcDateCount(value.year, value.month);
     return v;
@@ -1026,7 +1033,11 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     int colType = getColumnType(_col);
     switch (colType) {
       case 0:
-        _text = "${yearBegin + index}${_checkStr(yearSuffix)}";
+        if (twoDigitYear != null && twoDigitYear) {
+          _text = "${_yearBegin + index}";          
+          _text = "${_text.substring(_text.length - (_text.length - 2), _text.length)}${_checkStr(yearSuffix)}";
+        } else
+          _text = "${_yearBegin + index}${_checkStr(yearSuffix)}";
         break;
       case 1:
         if (isNumberMonth) {
@@ -1071,11 +1082,13 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
 
   @override
   void doShow() {
+    if (_yearBegin == 0)
+      getLength();
     for (int i = 0; i < getMaxLevel(); i++) {
       int colType = getColumnType(i);
       switch (colType) {
         case 0:
-          picker.selecteds[i] = value.year - yearBegin;
+          picker.selecteds[i] = value.year - _yearBegin;
           break;
         case 1:
           picker.selecteds[i] = value.month - 1;
@@ -1117,7 +1130,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     int colType = getColumnType(column);
     switch (colType) {
       case 0:
-        year = yearBegin + index;
+        year = _yearBegin + index;
         break;
       case 1:
         month = index + 1;
