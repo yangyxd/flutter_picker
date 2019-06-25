@@ -1,7 +1,7 @@
 ## 1.0.12
 
 * Repair BUG: #38, #40
-* Add the twoDigitYear attribute to support small screens (#39)
+* DateTimePickerAdapter: Add the twoDigitYear attribute to support small screens (#39)
 
 ## 1.0.11
 
