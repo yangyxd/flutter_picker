@@ -45,7 +45,7 @@ class PickerLocalizations {
       'cancelText': 'Annuler',
       'confirmText': 'Confirmer',
       'ampm': ['Matin', 'Après-midi'],
-    },    
+    },
   };
 
   static PickerLocalizations _static = const PickerLocalizations(null);
@@ -94,7 +94,7 @@ class Picker {
   final String confirmText;
 
   final double height, itemExtent;
-  final TextStyle textStyle, cancelTextStyle, confirmTextStyle;
+  final TextStyle textStyle, cancelTextStyle, confirmTextStyle, selectedTextStyle;
   final TextAlign textAlign;
   final double textScaleFactor;
   final EdgeInsetsGeometry columnPadding;
@@ -115,6 +115,7 @@ class Picker {
       this.itemExtent = 28.0,
       this.columnPadding,
       this.textStyle,
+      this.selectedTextStyle,
       this.cancelTextStyle,
       this.confirmTextStyle,
       this.textAlign = TextAlign.start,
@@ -480,14 +481,15 @@ abstract class PickerAdapter<T> {
   void initSelects();
   Widget buildItem(BuildContext context, int index);
 
-  Widget makeText(Widget child, String text) {
+  // Set selectedTextStyle only when this text is selected.
+  Widget makeText(Widget child, String text, {TextStyle selectedTextStyle}) {
     return new Container(
         alignment: Alignment.center,
         child: DefaultTextStyle(
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             textAlign: picker.textAlign,
-            style: picker.textStyle ??
+            style: selectedTextStyle ?? picker.textStyle ??
                 new TextStyle(
                     color: Colors.black87, fontSize: Picker.DefaultTextSize),
             child: child ?? new Text(text, textScaleFactor: picker.textScaleFactor)
@@ -495,7 +497,7 @@ abstract class PickerAdapter<T> {
     );
   }
 
-  Widget makeTextEx(Widget child, String text, Widget postfix, Widget suffix) {
+  Widget makeTextEx(Widget child, String text, Widget postfix, Widget suffix, {TextStyle selectedTextStyle}) {
     List<Widget> items = [];
     if (postfix != null)
       items.add(postfix);
@@ -508,7 +510,7 @@ abstract class PickerAdapter<T> {
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             textAlign: picker.textAlign,
-            style: picker.textStyle ??
+            style: selectedTextStyle ?? picker.textStyle ??
                 new TextStyle(
                     color: Colors.black87, fontSize: Picker.DefaultTextSize),
             child: Wrap(
@@ -824,9 +826,17 @@ class NumberPickerAdapter extends PickerAdapter<int> {
   @override
   Widget buildItem(BuildContext context, int index) {
     if (cur.postfix == null && cur.suffix == null)
-      return makeText(null, cur.getValueText(index));
+      if(picker.selecteds[data.indexOf(cur)]==index) {
+        return makeText(null, cur.getValueText(index), selectedTextStyle: picker.selectedTextStyle);
+      }else{
+        return makeText(null, cur.getValueText(index));
+      }
     else
+    if(picker.selecteds[data.indexOf(cur)]==index) {
+      return makeTextEx(null, cur.getValueText(index), cur.postfix, cur.suffix, selectedTextStyle: picker.selectedTextStyle);
+    }else{
       return makeTextEx(null, cur.getValueText(index), cur.postfix, cur.suffix);
+    }
   }
 
   @override
@@ -1039,7 +1049,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     switch (colType) {
       case 0:
         if (twoDigitYear != null && twoDigitYear) {
-          _text = "${_yearBegin + index}";          
+          _text = "${_yearBegin + index}";
           _text = "${_text.substring(_text.length - (_text.length - 2), _text.length)}${_checkStr(yearSuffix)}";
         } else
           _text = "${_yearBegin + index}${_checkStr(yearSuffix)}";
@@ -1068,8 +1078,11 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         _text = "${intToStr(index+1)}";
         break;
     }
-
-    return makeText(null, _text);
+    if(picker.selecteds[_col]==index) {
+      return makeText(null, _text, selectedTextStyle: picker.selectedTextStyle);
+    }else{
+      return makeText(null, _text);
+    }
   }
 
   @override

@@ -240,6 +240,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   showPickerNumber(BuildContext context) {
     Picker(
+      selectedTextStyle: TextStyle(
+        color: Colors.red,
+        fontSize: 26,
+      ),
         adapter: NumberPickerAdapter(data: [
           NumberPickerColumn(begin: 0, end: 999, postfix: Text("\$"), suffix: Icon(Icons.insert_emoticon)),
           NumberPickerColumn(begin: 200, end: 100, jump: -10),
@@ -314,8 +318,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   showPickerDateTime(BuildContext context) {
     new Picker(
+      selectedTextStyle: TextStyle(
+        color: Colors.red,
+        fontSize: 26
+      ),
         adapter: new DateTimePickerAdapter(
-          type: PickerDateTimeType.kYMD_AP_HM,
+          type: PickerDateTimeType.kHM_AP,
           isNumberMonth: true,
           //strAMPM: const["上午", "下午"],
           yearSuffix: "年",
