@@ -1166,18 +1166,19 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         s = index;
         break;
       case 6:
+      // According to the convention, 12:00 pm is 12:00 in format of 24 hours
         if (picker.selecteds[_colAP] == 0) {
-          if (h == 0) h = 12;
-          if (h > 12) h = h - 12;
-        } else {
-          if (h < 12) h = h + 12;
-          if (h == 12) h = 0;
+          if(h >= 12) h = h - 12;
+        }else{
+          if(h < 12) h = h + 12;
         }
         break;
       case 7:
         h = index + 1;
         if (_colAP >= 0 && picker.selecteds[_colAP] == 1) h = h + 12;
-        if (h > 23) h = 0;
+        if (_colAP >= 0 && picker.selecteds[_colAP] == 0 && h==12) h = 0;
+        // According to the convention, 12:00 pm is 12:00 in format of 24 hours
+        if (h > 23) h = 12;
         break;
     }
     int cday = _calcDateCount(year, month);
