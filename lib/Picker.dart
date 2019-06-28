@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/material/dialog.dart' as Dialog;
+import 'package:flutter/material.dart' as Dialog;
 
 const bool __printDebug = false;
 
