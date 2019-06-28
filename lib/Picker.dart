@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/material/dialog.dart' as Dialog;
+import 'package:flutter/material.dart' as Dialog;
 
 const bool __printDebug = false;
 
@@ -101,6 +101,7 @@ class Picker {
   final Color backgroundColor, headercolor, containerColor;
   final bool hideHeader;
   final bool looping;
+  final Widget footer;
 
   final Decoration headerDecoration;
 
@@ -118,6 +119,7 @@ class Picker {
       this.selectedTextStyle,
       this.cancelTextStyle,
       this.confirmTextStyle,
+      this.selectedTextStyle,
       this.textAlign = TextAlign.start,
       this.textScaleFactor,
       this.title,
@@ -133,6 +135,7 @@ class Picker {
       this.looping = false,
       this.headerDecoration,
       this.columnFlex,
+      this.footer,
       this.onCancel,
       this.onSelect,
       this.onConfirm})
@@ -310,6 +313,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: _buildViews(),
         ),
+        picker.footer ?? SizedBox(width: 0.0, height: 0.0),
       ],
     );
     if (widget.isModal == null || widget.isModal == false)
@@ -481,8 +485,8 @@ abstract class PickerAdapter<T> {
   void initSelects();
   Widget buildItem(BuildContext context, int index);
 
-  // Set selectedTextStyle only when this text is selected.
-  Widget makeText(Widget child, String text, {TextStyle selectedTextStyle}) {
+
+  Widget makeText(Widget child, String text, bool isSel) {
     return new Container(
         alignment: Alignment.center,
         child: DefaultTextStyle(
@@ -492,18 +496,28 @@ abstract class PickerAdapter<T> {
             style: selectedTextStyle ?? picker.textStyle ??
                 new TextStyle(
                     color: Colors.black87, fontSize: Picker.DefaultTextSize),
-            child: child ?? new Text(text, textScaleFactor: picker.textScaleFactor)
+            child: child ?? new Text(text, textScaleFactor: picker.textScaleFactor, style: (isSel ? picker.selectedTextStyle : null))
         )
     );
   }
 
-  Widget makeTextEx(Widget child, String text, Widget postfix, Widget suffix, {TextStyle selectedTextStyle}) {
+  Widget makeTextEx(Widget child, String text, Widget postfix, Widget suffix, bool isSel) {
     List<Widget> items = [];
     if (postfix != null)
       items.add(postfix);
-    items.add(child ?? new Text(text));
+    items.add(child ?? new Text(text, style: (isSel ? picker.selectedTextStyle : null)));
     if (suffix != null)
       items.add(suffix);
+
+    var _txtColor = Colors.black87;
+    var _txtSize = Picker.DefaultTextSize;
+    if (isSel && picker.selectedTextStyle != null) {
+      if (picker.selectedTextStyle.color != null)
+        _txtColor = picker.selectedTextStyle.color;
+      if (picker.selectedTextStyle.fontSize != null)
+        _txtSize = picker.selectedTextStyle.fontSize;
+    }
+
     return new Container(
         alignment: Alignment.center,
         child: DefaultTextStyle(
@@ -512,7 +526,7 @@ abstract class PickerAdapter<T> {
             textAlign: picker.textAlign,
             style: selectedTextStyle ?? picker.textStyle ??
                 new TextStyle(
-                    color: Colors.black87, fontSize: Picker.DefaultTextSize),
+                    color: _txtColor, fontSize: _txtSize),
             child: Wrap(
               children: items,
             )
@@ -569,6 +583,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
   List<PickerItem<T>> data;
   List<PickerItem<dynamic>> _datas;
   int _maxLevel = -1;
+  int _col = 0;
   final bool isArray;
 
   PickerDataAdapter({List pickerdata, this.data, this.isArray = false}) {
@@ -646,6 +661,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
   }
 
   void setColumn(int index) {
+    _col = index + 1;
     if (isArray) {
       if (__printDebug) print("index: $index");
       if (index + 1 < data.length)
@@ -654,12 +670,12 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
         _datas = null;
       return;
     }
-    if (index < 0)
+    if (index < 0) {
       _datas = data;
-    else {
-      int select = picker.selecteds[index];
-      if (_datas != null && _datas.length > select)
-        _datas = _datas[select].children;
+    } else {
+      var _select = picker.selecteds[index];
+      if (_datas != null && _datas.length > _select)
+        _datas = _datas[_select].children;
       else
         _datas = null;
     }
@@ -682,7 +698,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     if (item.text != null) {
       return item.text;
     }
-    return makeText(item.text, item.text != null ? null : item.value.toString());
+    return makeText(item.text, item.text != null ? null : item.value.toString(), index == picker.selecteds[_col]);
   }
 
   @override
@@ -784,6 +800,7 @@ class NumberPickerAdapter extends PickerAdapter<int> {
 
   final List<NumberPickerColumn> data;
   NumberPickerColumn cur;
+  int _col = 0;
 
   @override
   int getLength() {
@@ -804,10 +821,12 @@ class NumberPickerAdapter extends PickerAdapter<int> {
 
   @override
   void setColumn(int index) {
-    if (index + 1 >= data.length)
+    _col = index + 1;
+    if (index + 1 >= data.length) {
       cur = null;
-    else
+    } else {
       cur = data[index + 1];
+    }
   }
 
   @override
@@ -826,17 +845,9 @@ class NumberPickerAdapter extends PickerAdapter<int> {
   @override
   Widget buildItem(BuildContext context, int index) {
     if (cur.postfix == null && cur.suffix == null)
-      if(picker.selecteds[data.indexOf(cur)]==index) {
-        return makeText(null, cur.getValueText(index), selectedTextStyle: picker.selectedTextStyle);
-      }else{
-        return makeText(null, cur.getValueText(index));
-      }
+      return makeText(null, cur.getValueText(index), index == picker.selecteds[_col]);
     else
-    if(picker.selecteds[data.indexOf(cur)]==index) {
-      return makeTextEx(null, cur.getValueText(index), cur.postfix, cur.suffix, selectedTextStyle: picker.selectedTextStyle);
-    }else{
-      return makeTextEx(null, cur.getValueText(index), cur.postfix, cur.suffix);
-    }
+      return makeTextEx(null, cur.getValueText(index), cur.postfix, cur.suffix, index == picker.selecteds[_col]);
   }
 
   @override
@@ -1078,11 +1089,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         _text = "${intToStr(index+1)}";
         break;
     }
-    if(picker.selecteds[_col]==index) {
-      return makeText(null, _text, selectedTextStyle: picker.selectedTextStyle);
-    }else{
-      return makeText(null, _text);
-    }
+    return makeText(null, _text, picker.selecteds[_col]==index);
   }
 
   @override
@@ -1181,8 +1188,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         if (h > 23) h = 12;
         break;
     }
-    int cday = _calcDateCount(year, month);
-    if (day > cday) day = cday;
+    int __day = _calcDateCount(year, month);
+    if (day > __day) day = __day;
     value = new DateTime(year, month, day, h, m, s);
 
     if (minValue != null && (value.millisecondsSinceEpoch < minValue.millisecondsSinceEpoch)) {

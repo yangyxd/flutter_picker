@@ -1,3 +1,8 @@
+## 1.0.13
+
+* Add parameter: selectedTextStyle, Styles for setting selected items. (thank: @TristanWYL)
+* Add parameter: footer, Widgets can be added at the bottom.
+
 ## 1.0.12
 
 * Repair BUG: #38, #40
