@@ -147,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
       changeToFirst: true,
       textAlign: TextAlign.left,
       textStyle: const TextStyle(color: Colors.blue),
+      selectedTextStyle: TextStyle(color: Colors.red),
       columnPadding: const EdgeInsets.all(8.0),
       onConfirm: (Picker picker, List value) {
         print(value.toString());
@@ -161,6 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
       adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       hideHeader: false,
+      selectedTextStyle: TextStyle(color: Colors.blue),
       onConfirm: (Picker picker, List value) {
         print(value.toString());
         print(picker.adapter.text);
@@ -199,6 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
           PickerItem(text: Icon(Icons.close), value: Icons.close),
         ]),
         title: Text("Select Icon"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -212,6 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
         adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
         hideHeader: true,
         title: new Text("Select Data"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -228,6 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
         hideHeader: true,
         selecteds: [3, 0, 2],
         title: Text("Please Select"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
         cancel: FlatButton(onPressed: () {
           Navigator.pop(context);
         }, child: Icon(Icons.child_care)),
@@ -253,6 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         hideHeader: true,
         title: Text("Please Select"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -281,6 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         hideHeader: true,
         title: Text("Please Select"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());
@@ -293,6 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
       hideHeader: true,
       adapter: DateTimePickerAdapter(),
       title: Text("Select Data"),
+      selectedTextStyle: TextStyle(color: Colors.blue),
       onConfirm: (Picker picker, List value) {
         print((picker.adapter as DateTimePickerAdapter).value);
       }
@@ -306,6 +314,7 @@ class _MyHomePageState extends State<MyHomePage> {
           customColumnType: [2,1,0,3,4],
         ),
         title: new Text("Select Data"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           print((picker.adapter as DateTimePickerAdapter).value);
         }
@@ -326,6 +335,20 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         title: new Text("Select DateTime"),
         textAlign: TextAlign.right,
+        selectedTextStyle: TextStyle(color: Colors.blue),
+        delimiter: [
+          PickerDelimiter(column: 5, child: Container(
+            width: 16.0,
+            alignment: Alignment.center,
+            child: Text(':', style: TextStyle(fontWeight: FontWeight.bold)),
+            color: Colors.white,
+          ))
+        ],
+        footer: Container(
+          height: 50.0,
+          alignment: Alignment.center,
+          child: Text('Footer'),
+        ),
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         },
