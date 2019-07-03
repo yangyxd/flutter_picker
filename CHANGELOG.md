@@ -1,3 +1,7 @@
+## 1.0.14
+
+* Added return for showModal #44 (thank: @GiorgioBertolotti)
+
 ## 1.0.13
 
 * Add parameter: selectedTextStyle, Styles for setting selected items. (thank: @TristanWYL)

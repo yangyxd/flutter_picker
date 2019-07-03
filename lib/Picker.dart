@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as Dialog;
+import 'dart:async';
 
 const bool __printDebug = false;
 
@@ -161,8 +162,8 @@ class Picker {
   }
 
   /// 显示模态 picker
-  void showModal(BuildContext context, [ThemeData themeData]) {
-    showModalBottomSheet(
+  Future<T> showModal<T>(BuildContext context, [ThemeData themeData]) async {
+    return await showModalBottomSheet<T>(
         context: context, //state.context,
         builder: (BuildContext context) {
           return makePicker(themeData, true);
