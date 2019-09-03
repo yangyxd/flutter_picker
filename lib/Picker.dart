@@ -185,7 +185,7 @@ class Picker {
                     Navigator.pop(context);
                     if (onCancel != null) onCancel();
                   },
-                  child: Text(_cancelText)));
+                  child: cancelTextStyle == null ? Text(_cancelText) : DefaultTextStyle(child: Text(_cancelText), style: cancelTextStyle)));
             }
           } else {
             actions.add(cancel);
@@ -199,7 +199,7 @@ class Picker {
                     Navigator.pop(context);
                     if (onConfirm != null) onConfirm(this, selecteds);
                   },
-                  child: Text(_confirmText)));
+                  child: confirmTextStyle == null ? Text(_confirmText) : DefaultTextStyle(child: Text(_confirmText), style: confirmTextStyle)));
             }
           } else {
             actions.add(confirm);
@@ -303,7 +303,9 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           ),
           decoration: picker.headerDecoration ?? BoxDecoration(
             border: Border(
-                top: BorderSide(color: theme.dividerColor, width: 0.5)),
+                top: BorderSide(color: theme.dividerColor, width: 0.5),
+                bottom: BorderSide(color: theme.dividerColor, width: 0.5),
+            ),
             color: picker.headercolor == null
                 ? theme.bottomAppBarColor
                 : picker.headercolor,
@@ -406,10 +408,6 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
             padding: picker.columnPadding,
             height: picker.height,
             decoration: BoxDecoration(
-              border: picker.hideHeader
-                  ? null
-                  : new Border(
-                      top: BorderSide(color: theme.dividerColor, width: 0.5)),
               color: picker.containerColor == null
                   ? theme.dialogBackgroundColor
                   : picker.containerColor,
@@ -442,6 +440,14 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           ),
         );
         items.add(view);
+
+        if (!picker.changeToFirst && picker.selecteds[i] >= _length) {
+          Timer(Duration(milliseconds: 100), () {
+            if (__printDebug) print("timer last");
+            scrollController[i].jumpToItem(_length - 1);
+          });
+        }
+
         adapter.setColumn(i);
       }
     }

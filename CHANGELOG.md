@@ -1,3 +1,9 @@
+## 1.0.15
+
+* Move the edge of the head to the bottom of the head so that it can be hidden by customization. #55 (thank: @StarOfLife)
+* Repair bug: .showDialog(contex) - error for define style #49 (thank: @nielgomes)
+* Repair bug: Change superior data, lower data display blank #48 (thank: @DemoJameson)
+
 ## 1.0.14
 
 * Added return for showModal #44 (thank: @GiorgioBertolotti)
