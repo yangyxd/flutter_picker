@@ -1105,9 +1105,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
 
   @override
   int getColumnFlex(int column) {
-    if (getColumnType(column) == 0) {
+    if (picker.columnFlex != null && column < picker.columnFlex.length)
+      return picker.columnFlex[column];
+    if (getColumnType(column) == 0)
       return 3;
-    }
     return 2;
   }
 
