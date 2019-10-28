@@ -1,3 +1,7 @@
+## 1.1.0
+
+* Project reconstruction, removing Android, IOS directory. 
+
 ## 1.0.15
 
 * Move the edge of the head to the bottom of the head so that it can be hidden by customization. #55 (thank: @StarOfLife)
