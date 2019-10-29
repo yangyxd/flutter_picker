@@ -1,6 +1,7 @@
 ## 1.1.0
 
 * Project reconstruction, removing Android, IOS directory. 
+* Add localization for Spanish language
 
 ## 1.0.15
 

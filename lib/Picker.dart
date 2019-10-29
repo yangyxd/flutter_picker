@@ -46,7 +46,12 @@ class PickerLocalizations {
       'cancelText': 'Annuler',
       'confirmText': 'Confirmer',
       'ampm': ['Matin', 'Après-midi'],
-    },    
+    },
+    'es': {
+      'cancelText': 'Cancelar',
+      'confirmText': 'Confirmar',
+      'ampm': ['AM', 'PM'],
+    },
   };
 
   static PickerLocalizations _static = const PickerLocalizations(null);
