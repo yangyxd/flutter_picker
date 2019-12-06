@@ -447,13 +447,15 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                   picker.selecteds[i] = index;
                   updateScrollController(i);
                   adapter.doSelect(i, index);
-                  if (picker.changeToFirst) {
+                  if (picker.changeToFirst||
+                      picker.getSelectedValues().length != picker.selecteds.length) {
                     for (int j = i + 1; j < picker.selecteds.length; j++) {
                       picker.selecteds[j] = 0;
                       scrollController[j].jumpTo(0.0);
                     }
                   }
-                  if (picker.onSelect != null)
+                  if (picker.onSelect != null||
+                      picker.getSelectedValues().length != picker.selecteds.length)
                     picker.onSelect(picker, i, picker.selecteds);
                 });
               },
@@ -1092,7 +1094,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     switch (colType) {
       case 0:
         if (twoDigitYear != null && twoDigitYear) {
-          _text = "${_yearBegin + index}";          
+          _text = "${_yearBegin + index}";
           _text = "${_text.substring(_text.length - (_text.length - 2), _text.length)}${_checkStr(yearSuffix)}";
         } else
           _text = "${_yearBegin + index}${_checkStr(yearSuffix)}";
