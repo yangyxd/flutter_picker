@@ -12,7 +12,7 @@ class PickerLocalizationsDelegate
       const PickerLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en', 'zh', 'ko', 'it', 'ar','fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => ['en', 'zh', 'ko', 'it', 'ar','fr','tr'].contains(locale.languageCode);
 
   @override
   Future<PickerLocalizations> load(Locale locale) {
