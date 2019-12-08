@@ -52,7 +52,7 @@ class PickerLocalizations {
       'confirmText': 'Confirmar',
       'ampm': ['AM', 'PM'],
     },
-	'tr': {
+    'tr': {
       'cancelText': 'İptal',
       'confirmText': 'Onay',
       'ampm': ['ÖÖ', 'ÖS'],
