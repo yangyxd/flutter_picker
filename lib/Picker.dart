@@ -46,7 +46,17 @@ class PickerLocalizations {
       'cancelText': 'Annuler',
       'confirmText': 'Confirmer',
       'ampm': ['Matin', 'Après-midi'],
-    },    
+    },
+    'es': {
+      'cancelText': 'Cancelar',
+      'confirmText': 'Confirmar',
+      'ampm': ['AM', 'PM'],
+    },
+	'tr': {
+      'cancelText': 'İptal',
+      'confirmText': 'Onay',
+      'ampm': ['ÖÖ', 'ÖS'],
+    },
   };
 
   static PickerLocalizations _static = const PickerLocalizations(null);
@@ -76,16 +86,21 @@ class PickerLocalizations {
 class Picker {
   static const double DefaultTextSize = 20.0;
 
+  /// Index of currently selected items
   List<int> selecteds;
+  /// Picker adapter, Used to provide data and generate widgets
   final PickerAdapter adapter;
+  /// insert separator before picker columns
   final List<PickerDelimiter> delimiter;
 
   final VoidCallback onCancel;
   final PickerSelectedCallback onSelect;
   final PickerConfirmCallback onConfirm;
 
+  /// When the previous level selection changes, scroll the child to the first item.
   final changeToFirst;
 
+  /// Specify flex for each column
   final List<int> columnFlex;
 
   final Widget title;
@@ -94,14 +109,26 @@ class Picker {
   final String cancelText;
   final String confirmText;
 
-  final double height, itemExtent;
+  final double height;
+
+  /// Height of list item
+  final double itemExtent;
+
   final TextStyle textStyle, cancelTextStyle, confirmTextStyle, selectedTextStyle;
   final TextAlign textAlign;
+
+  /// Text scaling factor
   final double textScaleFactor;
+
   final EdgeInsetsGeometry columnPadding;
   final Color backgroundColor, headercolor, containerColor;
+
+  /// Hide head
   final bool hideHeader;
+
+  /// List item loop
   final bool looping;
+
   final Widget footer;
 
   final Decoration headerDecoration;
@@ -146,6 +173,7 @@ class Picker {
   int _maxLevel = 1;
 
   /// 生成picker控件
+  /// Build picker control
   Widget makePicker([ThemeData themeData, bool isModal = false]) {
     _maxLevel = adapter.maxLevel;
     adapter.picker = this;
@@ -154,14 +182,14 @@ class Picker {
     return _widget;
   }
 
-  /// 显示 picker
+  /// show picker
   void show(ScaffoldState state, [ThemeData themeData]) {
     state.showBottomSheet((BuildContext context) {
       return makePicker(themeData);
     });
   }
 
-  /// 显示模态 picker
+  /// Display modal picker
   Future<T> showModal<T>(BuildContext context, [ThemeData themeData]) async {
     return await showModalBottomSheet<T>(
         context: context, //state.context,
@@ -214,6 +242,7 @@ class Picker {
   }
 
   /// 获取当前选择的值
+  /// Get the value of the current selection
   List getSelectedValues() {
     return adapter.getSelectedValues();
   }
@@ -557,7 +586,10 @@ abstract class PickerAdapter<T> {
   }
 
   int get maxLevel => getMaxLevel();
+
+  /// Content length of current column
   int get length => getLength();
+
   String get text => getText();
 
   // 是否联动，即后面的列受前面列数据影响
