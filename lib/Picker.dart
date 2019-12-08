@@ -967,6 +967,36 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     "November",
     "December"
   ];
+  
+  static const List<String> MonthsList_TR = const [
+    "Oca",
+    "Şub",
+    "Mar",
+    "Nis",
+    "May",
+    "Haz",
+    "Tem",
+    "Ağu",
+    "Eyl",
+    "Eki",
+    "Kas",
+    "Ara"
+  ];
+
+  static const List<String> MonthsList_TR_L = const [
+    "Ocak",
+    "Şubat",
+    "Mart",
+    "Nisan",
+    "Mayıs",
+    "Haziran",
+    "Temmuz",
+    "Ağustos",
+    "Eylül",
+    "Ekim",
+    "Kasım",
+    "Aralık"
+  ];
 
   DateTimePickerAdapter({
     Picker picker,
