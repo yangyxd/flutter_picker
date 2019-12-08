@@ -1,3 +1,6 @@
+## 1.0.16
+* Add localization for Turkish language
+
 ## 1.0.15
 
 * Move the edge of the head to the bottom of the head so that it can be hidden by customization. #55 (thank: @StarOfLife)
