@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as Dialog;
 import 'dart:async';
+import 'PickerLocalizations.dart';
 
 const bool __printDebug = false;
 
@@ -13,69 +14,6 @@ typedef PickerConfirmCallback = void Function(
     Picker picker, List<int> selecteds);
 /// Picker value format callback.
 typedef PickerValueFormat<T> = String Function(T value);
-
-/// localizations
-class PickerLocalizations {
-  static const Map<String, Map<String, Object>> localizedValues = {
-    'en': {
-      'cancelText': 'Cancel',
-      'confirmText': 'Confirm',
-      'ampm': ['AM', 'PM'],
-    },
-    'zh': {
-      'cancelText': '取消',
-      'confirmText': '确定',
-      'ampm': ['上午', '下午'],
-    },
-    'ko': {
-      'cancelText': '취소',
-      'confirmText': '확인',
-      'ampm': ['오전', '오후'],
-    },
-    'it': {
-      'cancelText': 'Annulla',
-      'confirmText': 'Conferma',
-      'ampm': ['AM', 'PM'],
-    },
-    'ar':{
-      'cancelText': 'إلغاء الأمر',
-      'confirmText': 'تأكيد',
-      'ampm': ['صباحاً', 'مساءً'],
-    },
-    'fr': {
-      'cancelText': 'Annuler',
-      'confirmText': 'Confirmer',
-      'ampm': ['Matin', 'Après-midi'],
-    },
-    'es': {
-      'cancelText': 'Cancelar',
-      'confirmText': 'Confirmar',
-      'ampm': ['AM', 'PM'],
-    },
-  };
-
-  static PickerLocalizations _static = const PickerLocalizations(null);
-
-  final Locale locale;
-
-  const PickerLocalizations(this.locale);
-
-  static PickerLocalizations of(BuildContext context) {
-    return Localizations.of<PickerLocalizations>(context, PickerLocalizations) ?? _static;
-  }
-
-  Object getItem(String key) {
-    Map localData;
-    if (locale != null)  localData = localizedValues[locale.languageCode];
-    if (localData == null) return localizedValues['en'][key];
-    return localData[key];
-  }
-
-  String get cancelText => getItem("cancelText");
-  String get confirmText => getItem("confirmText");
-  List get ampm => getItem("ampm");
-}
-
 
 /// Picker
 class Picker {
@@ -447,7 +385,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                   picker.selecteds[i] = index;
                   updateScrollController(i);
                   adapter.doSelect(i, index);
-                  if (picker.changeToFirst) {
+                  if (picker.changeToFirst || picker.getSelectedValues().length != picker.selecteds.length) {
                     for (int j = i + 1; j < picker.selecteds.length; j++) {
                       picker.selecteds[j] = 0;
                       scrollController[j].jumpTo(0.0);
@@ -1101,7 +1039,12 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         if (isNumberMonth) {
           _text = "${index + 1}${_checkStr(monthSuffix)}";
         } else {
-          _text = "${months[index]}";
+          if (months != null)
+            _text = "${months[index]}";
+          else {
+            List _months = PickerLocalizations.of(context).months ?? MonthsList_EN;
+            _text = "${_months[index]}";
+          }
         }
         break;
       case 2:

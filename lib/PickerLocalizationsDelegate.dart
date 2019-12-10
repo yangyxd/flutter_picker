@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'Picker.dart';
+import 'PickerLocalizations.dart';
 
 /// picker localizations
 class PickerLocalizationsDelegate
@@ -12,8 +12,7 @@ class PickerLocalizationsDelegate
       const PickerLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en', 'zh', 'ko', 'it', 'ar', 'fr', 'es']
-      .contains(locale.languageCode);
+  bool isSupported(Locale locale) => PickerLocalizations.languages.contains(locale.languageCode);
 
   @override
   Future<PickerLocalizations> load(Locale locale) {

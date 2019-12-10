@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'PickerData.dart';
-//import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter/src/material/dialog.dart' as Dialog;
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() => runApp(new MyApp());
 
@@ -20,15 +19,18 @@ class _MyAppState extends State<MyApp> {
           primarySwatch: Colors.blue,
         ),
 
-//        localizationsDelegates: [
-//          PickerLocalizationsDelegate.delegate, // 如果要使用本地化，请添加此行，则可以显示中文按钮
-//          GlobalMaterialLocalizations.delegate,
-//          GlobalWidgetsLocalizations.delegate,
-//        ],
-//        supportedLocales: [
-//          const Locale('en', 'US'),
-//          const Locale('zh', 'CH'),
-//        ],
+        localizationsDelegates: [
+          PickerLocalizationsDelegate.delegate, // 如果要使用本地化，请添加此行，则可以显示中文按钮
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('en', 'US'),
+          const Locale('zh', 'CH'),
+          const Locale('ko', 'KO'),
+          const Locale('it', 'IT'),
+          const Locale('ar', 'AR')
+        ],
 
         home: new MyHomePage());
   }
@@ -394,7 +396,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: new Text(PickerLocalizations.of(context).confirmText))
     ];
 
-    Dialog.showDialog(
+    showDialog(
         context: context,
         builder: (BuildContext context) {
           return new AlertDialog(

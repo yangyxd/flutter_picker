@@ -1,3 +1,8 @@
+## 1.1.1
+* Add localization for Turkish language
+* Refactor localization code
+* Repair BUG
+
 ## 1.1.0
 
 * Project reconstruction, removing Android, IOS directory. 
