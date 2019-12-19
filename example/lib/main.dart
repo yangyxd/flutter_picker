@@ -29,7 +29,8 @@ class _MyAppState extends State<MyApp> {
           const Locale('zh', 'CH'),
           const Locale('ko', 'KO'),
           const Locale('it', 'IT'),
-          const Locale('ar', 'AR')
+          const Locale('ar', 'AR'),
+          const Locale('tr','TR')
         ],
 
         home: new MyHomePage());
