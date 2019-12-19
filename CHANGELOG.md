@@ -1,3 +1,7 @@
+## 1.1.2
+* Add the ability to jump minutes in DateTimePickerAdapter #76 (thank: MoacirSchmidt)
+* Repair BUG
+
 ## 1.1.1
 * Add localization for Turkish language
 * Refactor localization code

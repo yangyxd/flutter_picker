@@ -385,7 +385,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                   picker.selecteds[i] = index;
                   updateScrollController(i);
                   adapter.doSelect(i, index);
-                  if (picker.changeToFirst || picker.getSelectedValues().length != picker.selecteds.length) {
+                  if (picker.changeToFirst) {
                     for (int j = i + 1; j < picker.selecteds.length; j++) {
                       picker.selecteds[j] = 0;
                       scrollController[j].jumpTo(0.0);
@@ -859,12 +859,21 @@ class PickerDateTimeType {
 }
 
 class DateTimePickerAdapter extends PickerAdapter<DateTime> {
+  /// display type, ref: columnType
   final int type;
+  /// Whether to display the month in numerical form.If true, months is not used.
   final bool isNumberMonth;
+  /// custom months strings
   final List<String> months;
+  /// Custom AM, PM strings
   final List<String> strAMPM;
+  /// year begin...end.
   final int yearBegin, yearEnd;
+  /// minimum datetime
   final DateTime minValue, maxValue;
+  /// jump minutes, user could select time in intervals of 30min, 5mins, etc....
+  final int minuteInterval;
+  /// Year, month, day suffix
   final String yearSuffix, monthSuffix, daySuffix;
   /// use two-digit year, 2019, displayed as 19
   final bool twoDigitYear;
@@ -915,9 +924,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.yearSuffix,
     this.monthSuffix,
     this.daySuffix,
+    this.minuteInterval,
     this.customColumnType,
     this.twoDigitYear = false,
-  }) {
+  }) : assert (minuteInterval == null || (minuteInterval >= 1 && minuteInterval <= 30 && (60 % minuteInterval == 0))) {
     super.picker = picker;
     _yearBegin = yearBegin;
     if (minValue != null && minValue.year > _yearBegin) {
@@ -929,6 +939,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   int _colAP = -1;
   int _yearBegin = 0;
 
+  /// Currently selected value
   DateTime value;
 
   // but it can improve the performance, so keep it.
@@ -997,6 +1008,12 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       return ye - _yearBegin + 1;
     }
     if (v == 31) return _calcDateCount(value.year, value.month);
+    if (minuteInterval != null && minuteInterval > 1) {
+      int _type = getColumnType(_col);
+      if (_type == 4) {
+        return v ~/ minuteInterval;
+      }
+    }
     return v;
   }
 
@@ -1051,9 +1068,14 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         _text = "${index + 1}${_checkStr(daySuffix)}";
         break;
       case 3:
-      case 4:
       case 5:
         _text = "${intToStr(index)}";
+        break;
+      case 4:
+        if (minuteInterval == null || minuteInterval < 2)
+          _text = "${intToStr(index)}";
+        else
+          _text = "${intToStr(index * minuteInterval)}";
         break;
       case 6:
         List _ampm = strAMPM ?? PickerLocalizations.of(context).ampm;
@@ -1102,7 +1124,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           picker.selecteds[i] = value.hour;
           break;
         case 4:
-          picker.selecteds[i] = value.minute;
+          picker.selecteds[i] = minuteInterval == null || minuteInterval < 2 ? value.minute : value.minute ~/ minuteInterval;
           break;
         case 5:
           picker.selecteds[i] = value.second;
@@ -1144,7 +1166,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         h = index;
         break;
       case 4:
-        m = index;
+        m = (minuteInterval == null || minuteInterval < 2) ? index : index * minuteInterval;
         break;
       case 5:
         s = index;

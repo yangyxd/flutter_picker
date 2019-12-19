@@ -146,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
   showPicker(BuildContext context) {
     Picker picker = Picker(
       adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
-      changeToFirst: true,
+      changeToFirst: false,
       textAlign: TextAlign.left,
       textStyle: const TextStyle(color: Colors.blue),
       selectedTextStyle: TextStyle(color: Colors.red),
@@ -333,6 +333,7 @@ class _MyHomePageState extends State<MyHomePage> {
           monthSuffix: "月",
           daySuffix: "日",
           minValue: DateTime.now(),
+          minuteInterval: 30,
           // twoDigitYear: true,
         ),
         title: new Text("Select DateTime"),
