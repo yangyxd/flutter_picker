@@ -606,12 +606,9 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     if (pickerData == null) return;
     for (int i = 0; i < pickerData.length; i++) {
       var item = pickerData[i];
-      if (item is T) {
-        data.add(new PickerItem<T>(value: item));
-      } else if (item is Map) {
+      if (item is Map) {
         final Map map = item;
         if (map.length == 0) continue;
-
         List<T> _mapList = map.keys.toList();
         for (int j = 0; j < _mapList.length; j++) {
           var _o = map[_mapList[j]];
@@ -626,6 +623,8 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
         String _v = item.toString();
         //print('add: $_v');
         data.add(new PickerItem<T>(value: _v as T));
+      } else if (item is T) {
+        data.add(new PickerItem<T>(value: item));
       }
     }
   }
