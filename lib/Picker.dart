@@ -167,6 +167,7 @@ class Picker {
           }
 
           return AlertDialog(
+            key: Key('picker-dialog'),
             title: title,
             actions: actions,
             content: makePicker(),
