@@ -1,3 +1,6 @@
+## 1.1.3
+* return for showDialog , add barrierDismissible (thanks: Ali1Ammar)
+
 ## 1.1.2
 * Add the ability to jump minutes in DateTimePickerAdapter #76 (thank: MoacirSchmidt)
 * Repair BUG
