@@ -132,9 +132,10 @@ class Picker {
   }
 
   /// show dialog picker
-  void showDialog(BuildContext context) {
-    Dialog.showDialog(
+  Future<List<int>> showDialog(BuildContext context, {bool barrierDismissible = true, Key key}) {
+    return Dialog.showDialog<List<int>>(
         context: context,
+        barrierDismissible: barrierDismissible,
         builder: (BuildContext context) {
           List<Widget> actions = [];
 
@@ -143,7 +144,7 @@ class Picker {
             if (_cancelText != null && _cancelText != "") {
               actions.add(FlatButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pop<List<int>>(context, null);
                     if (onCancel != null) onCancel();
                   },
                   child: cancelTextStyle == null ? Text(_cancelText) : DefaultTextStyle(child: Text(_cancelText), style: cancelTextStyle)));
@@ -157,7 +158,7 @@ class Picker {
             if (_confirmText != null && _confirmText != "") {
               actions.add(FlatButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pop<List<int>>(context, selecteds);
                     if (onConfirm != null) onConfirm(this, selecteds);
                   },
                   child: confirmTextStyle == null ? Text(_confirmText) : DefaultTextStyle(child: Text(_confirmText), style: confirmTextStyle)));
@@ -167,6 +168,7 @@ class Picker {
           }
 
           return AlertDialog(
+            key: key ?? Key('picker-dialog'),
             title: title,
             actions: actions,
             content: makePicker(),
@@ -183,7 +185,7 @@ class Picker {
   /// 取消
   void doCancel(BuildContext context) {
     if (onCancel != null) onCancel();
-    Navigator.of(context).pop();
+    Navigator.of(context).pop<List<int>>(null);
     _widget = null;
   }
 
@@ -320,7 +322,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
               : DefaultTextStyle(
               style: TextStyle(
                   fontSize: Picker.DefaultTextSize,
-                  color: theme.textTheme.title.color),
+                  color: theme.textTheme.headline6.color),
               child: picker.title),
         )));
 
