@@ -65,6 +65,8 @@ class Picker {
 
   /// Hide head
   final bool hideHeader;
+  /// Show pickers in reversed order
+  final bool reverseOrder = false;
 
   /// List item loop
   final bool looping;
@@ -450,6 +452,11 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           items.insert(o.column, item);
       }
     }
+
+    if (picker.reverseOrder) {
+      return items.reversed.toList();
+    }
+
     return items;
   }
 
