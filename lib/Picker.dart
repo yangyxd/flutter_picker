@@ -66,7 +66,7 @@ class Picker {
   /// Hide head
   final bool hideHeader;
   /// Show pickers in reversed order
-  final bool reverseOrder = false;
+  final bool reversedOrder;
 
   /// List item loop
   final bool looping;
@@ -102,6 +102,7 @@ class Picker {
       this.changeToFirst = false,
       this.hideHeader = false,
       this.looping = false,
+      this.reversedOrder = false,
       this.headerDecoration,
       this.columnFlex,
       this.footer,
@@ -453,7 +454,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       }
     }
 
-    if (picker.reverseOrder) {
+    if (picker.reversedOrder) {
       return items.reversed.toList();
     }
 
