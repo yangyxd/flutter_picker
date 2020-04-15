@@ -1247,12 +1247,11 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     if (minValue != null &&
         (value.millisecondsSinceEpoch < minValue.millisecondsSinceEpoch)) {
       value = minValue;
-      notifyDataChanged();
     } else if (maxValue != null &&
         value.millisecondsSinceEpoch > maxValue.millisecondsSinceEpoch) {
       value = maxValue;
-      notifyDataChanged();
     }
+    notifyDataChanged();
   }
 
   int _getAPColIndex() {
