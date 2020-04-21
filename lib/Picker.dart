@@ -73,13 +73,17 @@ class Picker {
 
   final Widget footer;
 
+  final Function container;
+
   final Decoration headerDecoration;
 
   Widget _widget;
   PickerWidgetState _state;
 
   Picker(
-      {this.adapter,
+      {
+        this.container,
+        this.adapter,
       this.delimiter,
       this.selecteds,
       this.height = 150.0,
@@ -306,7 +310,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     if (widget.isModal == null || widget.isModal == false) return v;
     return GestureDetector(
       onTap: () {},
-      child: v,
+      child: picker.container == null ?
+          v : picker.container(v),
     );
   }
 

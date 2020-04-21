@@ -162,6 +162,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   showPickerModal(BuildContext context) {
     Picker(
+      container: (v){
+        return Container(color: Colors.redAccent,child: v,);
+      },
       adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       hideHeader: false,
@@ -172,6 +175,8 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     ).showModal(this.context); //_scaffoldKey.currentState);
   }
+
+
 
   showPickerIcons(BuildContext context) {
     Picker(
