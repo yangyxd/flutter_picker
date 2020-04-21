@@ -891,6 +891,7 @@ class PickerDateTimeType {
 
   static const int kYM = 11; // y, m
   static const int kDMY = 12; // d, m, y
+  static const int kY = 13; // y
 }
 
 class DateTimePickerAdapter extends PickerAdapter<DateTime> {
@@ -1004,6 +1005,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [0, 12, 31, 2, 12, 60],
     [0, 12],
     [31, 12, 0],
+    [0],
   ];
 
   static const Map<int, int> columnTypeLength = {
@@ -1032,6 +1034,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [0, 1, 2, 6, 7, 4],
     [0, 1],
     [2, 1, 0],
+    [0],
   ];
 
   static const List<int> leapYearMonths = const <int>[1, 3, 5, 7, 8, 10, 12];
