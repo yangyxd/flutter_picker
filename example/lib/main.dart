@@ -133,6 +133,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: listSpec),
             RaisedButton(
+              child: Text('Picker Show Datetime (Round background)'),
+              onPressed: () {
+                showPickerDateTimeRoundBg(context);
+              },
+            ),
+            SizedBox(height: listSpec),
+            RaisedButton(
               child: Text('Picker Show Date Range'),
               onPressed: () {
                 showPickerDateRange(context);
@@ -439,6 +446,55 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         }
     ).show(_scaffoldKey.currentState);
+  }
+
+  /// 圆角背景
+  showPickerDateTimeRoundBg(BuildContext context) {
+    var picker = Picker(
+        backgroundColor: Colors.transparent,
+        headerDecoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: Colors.black12, width: 0.5))
+        ),
+        adapter: new DateTimePickerAdapter(
+            type: PickerDateTimeType.kMDYHM,
+            isNumberMonth: true,
+            yearSuffix: "年",
+            monthSuffix: "月",
+            daySuffix: "日"
+        ),
+        delimiter: [
+          PickerDelimiter(column: 3, child: Container(
+            width: 8.0,
+            alignment: Alignment.center,
+          )),
+          PickerDelimiter(column: 5, child: Container(
+            width: 12.0,
+            alignment: Alignment.center,
+            child: Text(':', style: TextStyle(fontWeight: FontWeight.bold)),
+            color: Colors.white,
+          )),
+        ],
+        title: new Text("Select DateTime"),
+        onConfirm: (Picker picker, List value) {
+          print(picker.adapter.text);
+        },
+        onSelect: (Picker picker, int index, List<int> selecteds) {
+          this.setState(() {
+            stateText = picker.adapter.toString();
+          });
+        }
+    );
+
+    showModalBottomSheet(context: context, backgroundColor: Colors.transparent, builder: (context) {
+      return Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+        child: Container(
+          padding: const EdgeInsets.only(top: 4),
+          child: picker.makePicker(null, true),
+        )
+      );
+    });
   }
 
 }

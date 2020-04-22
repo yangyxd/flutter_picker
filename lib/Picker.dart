@@ -75,40 +75,47 @@ class Picker {
 
   final Decoration headerDecoration;
 
+  final double magnification;
+  final double diameterRatio;
+  final double squeeze;
+
   Widget _widget;
   PickerWidgetState _state;
 
   Picker(
       {this.adapter,
-      this.delimiter,
-      this.selecteds,
-      this.height = 150.0,
-      this.itemExtent = 28.0,
-      this.columnPadding,
-      this.textStyle,
-      this.cancelTextStyle,
-      this.confirmTextStyle,
-      this.selectedTextStyle,
-      this.textAlign = TextAlign.start,
-      this.textScaleFactor,
-      this.title,
-      this.cancel,
-      this.confirm,
-      this.cancelText,
-      this.confirmText,
-      this.backgroundColor = Colors.white,
-      this.containerColor,
-      this.headercolor,
-      this.changeToFirst = false,
-      this.hideHeader = false,
-      this.looping = false,
-      this.reversedOrder = false,
-      this.headerDecoration,
-      this.columnFlex,
-      this.footer,
-      this.onCancel,
-      this.onSelect,
-      this.onConfirm})
+        this.delimiter,
+        this.selecteds,
+        this.height = 150.0,
+        this.itemExtent = 28.0,
+        this.columnPadding,
+        this.textStyle,
+        this.cancelTextStyle,
+        this.confirmTextStyle,
+        this.selectedTextStyle,
+        this.textAlign = TextAlign.start,
+        this.textScaleFactor,
+        this.title,
+        this.cancel,
+        this.confirm,
+        this.cancelText,
+        this.confirmText,
+        this.backgroundColor = Colors.white,
+        this.containerColor,
+        this.headercolor,
+        this.changeToFirst = false,
+        this.hideHeader = false,
+        this.looping = false,
+        this.reversedOrder = false,
+        this.headerDecoration,
+        this.columnFlex,
+        this.footer,
+        this.magnification = 1.0,
+        this.diameterRatio = 1.1,
+        this.squeeze = 1.45,
+        this.onCancel,
+        this.onSelect,
+        this.onConfirm})
       : assert(adapter != null);
 
   Widget get widget => _widget;
@@ -163,7 +170,7 @@ class Picker {
                   child: cancelTextStyle == null
                       ? Text(_cancelText)
                       : DefaultTextStyle(
-                          child: Text(_cancelText), style: cancelTextStyle)));
+                      child: Text(_cancelText), style: cancelTextStyle)));
             }
           } else {
             actions.add(cancel);
@@ -181,7 +188,7 @@ class Picker {
                   child: confirmTextStyle == null
                       ? Text(_confirmText)
                       : DefaultTextStyle(
-                          child: Text(_confirmText), style: confirmTextStyle)));
+                      child: Text(_confirmText), style: confirmTextStyle)));
             }
           } else {
             actions.add(confirm);
@@ -214,6 +221,17 @@ class Picker {
     if (onConfirm != null) onConfirm(this, selecteds);
     Navigator.of(context).pop();
     _widget = null;
+  }
+
+  /// 弹制更新指定列的内容
+  /// 当 onSelect 事件中，修改了当前列前面的列的内容时，可以调用此方法来更新显示
+  void updateColumn(int index, [bool all = false]) {
+    if (all) {
+      _state.update();
+      return;
+    }
+    adapter.setColumn(index - 1);
+    _state._keys[index].currentState.update();
   }
 }
 
@@ -258,6 +276,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
   ThemeData theme;
   final List<FixedExtentScrollController> scrollController = [];
+  final List<GlobalKey<_StateViewState>> _keys = [];
 
   @override
   void initState() {
@@ -267,50 +286,66 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     picker.adapter.doShow();
 
     if (scrollController.length == 0) {
-      for (int i = 0; i < picker._maxLevel; i++)
-        scrollController
-            .add(FixedExtentScrollController(initialItem: picker.selecteds[i]));
+      for (int i = 0; i < picker._maxLevel; i++) {
+        scrollController.add(
+            FixedExtentScrollController(initialItem: picker.selecteds[i]));
+        _keys.add(GlobalKey(debugLabel: i.toString()));
+      }
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var v = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        (picker.hideHeader)
-            ? SizedBox()
-            : Container(
-                child: Row(
-                  children: _buildHeaderViews(),
-                ),
-                decoration: picker.headerDecoration ??
-                    BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: theme.dividerColor, width: 0.5),
-                        bottom:
-                            BorderSide(color: theme.dividerColor, width: 0.5),
-                      ),
-                      color: picker.headercolor == null
-                          ? theme.bottomAppBarColor
-                          : picker.headercolor,
-                    ),
-              ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: _buildViews(),
-        ),
-        picker.footer ?? SizedBox(width: 0.0, height: 0.0),
-      ],
-    );
-    if (widget.isModal == null || widget.isModal == false) return v;
-    return GestureDetector(
-      onTap: () {},
-      child: v,
-    );
+  void update() {
+    setState(() {});
   }
 
+  // var ref = 0;
+  @override
+  Widget build(BuildContext context) {
+    // print("picker build ${ref++}");
+
+    var _body = <Widget>[];
+    if (!picker.hideHeader) {
+      _body.add(DecoratedBox(
+        child: Row(
+          children: _buildHeaderViews(),
+        ),
+        decoration: picker.headerDecoration ??
+            BoxDecoration(
+              border: Border(
+                top: BorderSide(color: theme.dividerColor, width: 0.5),
+                bottom:
+                BorderSide(color: theme.dividerColor, width: 0.5),
+              ),
+              color: picker.headercolor == null
+                  ? theme.bottomAppBarColor
+                  : picker.headercolor,
+            ),
+      ));
+    }
+    _body.add(Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: _buildViews(),
+    ));
+
+    if (picker.footer != null)
+      _body.add(picker.footer);
+    Widget v = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: _body,
+    );
+    if (widget.isModal != null && widget.isModal) {
+      v = GestureDetector(
+        onTap: () {},
+        child: v,
+      );
+    }
+    return v;
+  }
+
+  List<Widget> _headerItems;
+
   List<Widget> _buildHeaderViews() {
+    if (_headerItems != null) return _headerItems;
     if (theme == null) theme = Theme.of(context);
     List<Widget> items = [];
 
@@ -338,16 +373,16 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     }
 
     items.add(Expanded(
-        child: Container(
-      alignment: Alignment.center,
-      child: picker.title == null
-          ? picker.title
-          : DefaultTextStyle(
+        child: Center(
+          //alignment: Alignment.center,
+          child: picker.title == null
+              ? picker.title
+              : DefaultTextStyle(
               style: TextStyle(
                   fontSize: Picker.DefaultTextSize,
                   color: theme.textTheme.title.color),
               child: picker.title),
-    )));
+        )));
 
     if (picker.confirm != null) {
       items.add(DefaultTextStyle(
@@ -372,6 +407,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       }
     }
 
+    _headerItems = items;
     return items;
   }
 
@@ -388,58 +424,78 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     if (adapter != null) adapter.setColumn(-1);
 
     if (adapter != null && adapter.length > 0) {
-      for (int i = 0; i < picker._maxLevel; i++) {
-        final int _length = adapter.length;
+      var _decoration = BoxDecoration(
+        color: picker.containerColor == null
+            ? theme.dialogBackgroundColor
+            : picker.containerColor,
+      );
 
-        Widget view = new Expanded(
+      for (int i = 0; i < picker._maxLevel; i++) {
+        Widget view = Expanded(
           flex: adapter.getColumnFlex(i),
           child: Container(
             padding: picker.columnPadding,
             height: picker.height,
-            decoration: BoxDecoration(
-              color: picker.containerColor == null
-                  ? theme.dialogBackgroundColor
-                  : picker.containerColor,
-            ),
-            child: CupertinoPicker(
-              backgroundColor: picker.backgroundColor,
-              scrollController: scrollController[i],
-              itemExtent: picker.itemExtent,
-              looping: picker.looping,
-              onSelectedItemChanged: (int index) {
-                if (__printDebug) print("onSelectedItemChanged");
-                setState(() {
-                  picker.selecteds[i] = index;
-                  updateScrollController(i);
-                  adapter.doSelect(i, index);
-                  if (picker.changeToFirst) {
-                    for (int j = i + 1; j < picker.selecteds.length; j++) {
-                      picker.selecteds[j] = 0;
-                      scrollController[j].jumpTo(0.0);
+            decoration: _decoration,
+            child: _StateView(
+              key: _keys[i],
+              builder: (context) {
+                adapter.setColumn(i - 1);
+                var _length = adapter.length;
+                var _view = CupertinoPicker(
+                  backgroundColor: picker.backgroundColor,
+                  scrollController: scrollController[i],
+                  itemExtent: picker.itemExtent,
+                  looping: picker.looping,
+                  magnification: picker.magnification,
+                  diameterRatio: picker.diameterRatio,
+                  squeeze: picker.squeeze,
+                  onSelectedItemChanged: (int index) {
+                    if (__printDebug) print("onSelectedItemChanged");
+                    picker.selecteds[i] = index;
+                    updateScrollController(i);
+                    adapter.doSelect(i, index);
+                    if (picker.changeToFirst) {
+                      for (int j = i + 1; j < picker.selecteds.length; j++) {
+                        picker.selecteds[j] = 0;
+                        scrollController[j].jumpTo(0.0);
+                      }
                     }
-                  }
-                  if (picker.onSelect != null)
-                    picker.onSelect(picker, i, picker.selecteds);
-                });
+                    if (picker.onSelect != null)
+                      picker.onSelect(picker, i, picker.selecteds);
+
+                    _keys[i].currentState.update();
+                    if (adapter.isLinkage) {
+                      for (int j = i + 1; j < picker.selecteds.length; j++) {
+                        adapter.setColumn(j - 1);
+                        _keys[j].currentState.update();
+                      }
+                    }
+
+                  },
+                  children: List<Widget>.generate(_length, (int index) {
+                    return adapter.buildItem(context, index);
+                  }),
+                );
+
+                if (!picker.changeToFirst && picker.selecteds[i] >= _length) {
+                  Timer(Duration(milliseconds: 100), () {
+                    if (__printDebug) print("timer last");
+                    adapter.setColumn(i - 1);
+                    var _len = adapter.length;
+                    scrollController[i].jumpToItem((_len < _length ? _len : _length)  - 1);
+                  });
+                }
+
+                return _view;
               },
-              children: List<Widget>.generate(_length, (int index) {
-                return adapter.buildItem(context, index);
-              }),
             ),
           ),
         );
         items.add(view);
-
-        if (!picker.changeToFirst && picker.selecteds[i] >= _length) {
-          Timer(Duration(milliseconds: 100), () {
-            if (__printDebug) print("timer last");
-            scrollController[i].jumpToItem(_length - 1);
-          });
-        }
-
-        adapter.setColumn(i);
       }
     }
+
     if (picker.delimiter != null) {
       for (int i = 0; i < picker.delimiter.length; i++) {
         var o = picker.delimiter[i];
@@ -485,19 +541,19 @@ abstract class PickerAdapter<T> {
   Widget buildItem(BuildContext context, int index);
 
   Widget makeText(Widget child, String text, bool isSel) {
-    return new Container(
-        alignment: Alignment.center,
+    return new Center(
+      //alignment: Alignment.center,
         child: DefaultTextStyle(
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             textAlign: picker.textAlign,
             style: picker.textStyle ??
-                new TextStyle(
+                TextStyle(
                     color: Colors.black87, fontSize: Picker.DefaultTextSize),
-            child: child ??
-                new Text(text,
-                    textScaleFactor: picker.textScaleFactor,
-                    style: (isSel ? picker.selectedTextStyle : null))));
+            child: child != null ? child :
+            Text(text,
+                textScaleFactor: picker.textScaleFactor,
+                style: (isSel ? picker.selectedTextStyle : null))));
   }
 
   Widget makeTextEx(
@@ -505,7 +561,7 @@ abstract class PickerAdapter<T> {
     List<Widget> items = [];
     if (postfix != null) items.add(postfix);
     items.add(child ??
-        new Text(text, style: (isSel ? picker.selectedTextStyle : null)));
+        Text(text, style: (isSel ? picker.selectedTextStyle : null)));
     if (suffix != null) items.add(suffix);
 
     var _txtColor = Colors.black87;
@@ -517,14 +573,14 @@ abstract class PickerAdapter<T> {
         _txtSize = picker.selectedTextStyle.fontSize;
     }
 
-    return new Container(
-        alignment: Alignment.center,
+    return new Center(
+      //alignment: Alignment.center,
         child: DefaultTextStyle(
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             textAlign: picker.textAlign,
             style: picker.textStyle ??
-                new TextStyle(color: _txtColor, fontSize: _txtSize),
+                TextStyle(color: _txtColor, fontSize: _txtSize),
             child: Wrap(
               children: items,
             )));
@@ -598,7 +654,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     if (pickerData != null &&
         pickerData.length > 0 &&
         (data == null || data.length == 0)) {
-      if (data == null) data = new List<PickerItem<T>>();
+      if (data == null) data = List<PickerItem<T>>();
       if (isArray) {
         _parseArrayPickerDataItem(pickerData, data);
       } else {
@@ -609,22 +665,23 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
 
   _parseArrayPickerDataItem(List pickerData, List<PickerItem> data) {
     if (pickerData == null) return;
-    for (int i = 0; i < pickerData.length; i++) {
+    var len = pickerData.length;
+    for (int i = 0; i < len; i++) {
       var v = pickerData[i];
       if (!(v is List)) continue;
       List lv = v;
       if (lv.length == 0) continue;
 
-      PickerItem item = new PickerItem<T>(children: List<PickerItem<T>>());
+      PickerItem item = PickerItem<T>(children: List<PickerItem<T>>());
       data.add(item);
 
       for (int j = 0; j < lv.length; j++) {
         var o = lv[j];
         if (o is T) {
-          item.children.add(new PickerItem<T>(value: o));
+          item.children.add(PickerItem<T>(value: o));
         } else if (T == String) {
           String _v = o.toString();
-          item.children.add(new PickerItem<T>(value: _v as T));
+          item.children.add(PickerItem<T>(value: _v as T));
         }
       }
     }
@@ -633,7 +690,8 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
 
   _parsePickerDataItem(List pickerData, List<PickerItem> data) {
     if (pickerData == null) return;
-    for (int i = 0; i < pickerData.length; i++) {
+    var len = pickerData.length;
+    for (int i = 0; i < len; i++) {
       var item = pickerData[i];
       if (item is T) {
         data.add(new PickerItem<T>(value: item));
@@ -660,6 +718,8 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     }
   }
 
+  var _lastColumn;
+
   void setColumn(int index) {
     _col = index + 1;
     if (isArray) {
@@ -673,11 +733,19 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     if (index < 0) {
       _datas = data;
     } else {
-      var _select = picker.selecteds[index];
-      if (_datas != null && _datas.length > _select)
-        _datas = _datas[_select].children;
-      else
-        _datas = null;
+      if (_lastColumn != null && _lastColumn == index)
+        return;
+      _datas = data;
+      for (int i = 0; i <= index; i++) {
+        var j = picker.selecteds[i];
+        if (_datas != null && _datas.length > j)
+          _datas = _datas[j].children;
+        else {
+          _datas = null;
+          break;
+        }
+      }
+      _lastColumn = index;
     }
   }
 
@@ -714,8 +782,9 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
   List<T> getSelectedValues() {
     List<T> _items = [];
     if (picker.selecteds != null) {
+      var _sLen = picker.selecteds.length;
       if (isArray) {
-        for (int i = 0; i < picker.selecteds.length; i++) {
+        for (int i = 0; i < _sLen; i++) {
           int j = picker.selecteds[i];
           if (j < 0 || data[i].children == null || j >= data[i].children.length)
             break;
@@ -723,7 +792,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
         }
       } else {
         List<PickerItem<dynamic>> datas = data;
-        for (int i = 0; i < picker.selecteds.length; i++) {
+        for (int i = 0; i < _sLen; i++) {
           int j = picker.selecteds[i];
           if (j < 0 || j >= datas.length) break;
           _items.add(datas[j].value);
@@ -973,9 +1042,9 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.customColumnType,
     this.twoDigitYear = false,
   }) : assert(minuteInterval == null ||
-            (minuteInterval >= 1 &&
-                minuteInterval <= 30 &&
-                (60 % minuteInterval == 0))) {
+      (minuteInterval >= 1 &&
+          minuteInterval <= 30 &&
+          (60 % minuteInterval == 0))) {
     super.picker = picker;
     _yearBegin = yearBegin;
     if (minValue != null && minValue.year > _yearBegin) {
@@ -1037,7 +1106,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     [0],
   ];
 
-  static const List<int> leapYearMonths = const <int>[1, 3, 5, 7, 8, 10, 12];
+  // static const List<int> leapYearMonths = const <int>[1, 3, 5, 7, 8, 10, 12];
 
   // 获取当前列的类型
   int getColumnType(int index) {
@@ -1087,7 +1156,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     _colAP = _getAPColIndex();
     int _maxLevel = getMaxLevel();
     if (picker.selecteds == null || picker.selecteds.length == 0) {
-      if (picker.selecteds == null) picker.selecteds = new List<int>();
+      if (picker.selecteds == null) picker.selecteds = List<int>();
       for (int i = 0; i < _maxLevel; i++) picker.selecteds.add(0);
     }
   }
@@ -1100,8 +1169,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       case 0:
         if (twoDigitYear != null && twoDigitYear) {
           _text = "${_yearBegin + index}";
-          _text =
-              "${_text.substring(_text.length - (_text.length - 2), _text.length)}${_checkStr(yearSuffix)}";
+          var _l = _text.length;
+          _text = "${_text.substring(_l - (_l - 2), _l)}${_checkStr(yearSuffix)}";
         } else
           _text = "${_yearBegin + index}${_checkStr(yearSuffix)}";
         break;
@@ -1160,7 +1229,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   @override
   void doShow() {
     if (_yearBegin == 0) getLength();
-    for (int i = 0; i < getMaxLevel(); i++) {
+    var _maxLevel = getMaxLevel();
+    for (int i = 0; i < _maxLevel; i++) {
       int colType = getColumnType(i);
       switch (colType) {
         case 0:
@@ -1245,16 +1315,17 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     }
     int __day = _calcDateCount(year, month);
     if (day > __day) day = __day;
-    value = new DateTime(year, month, day, h, m, s);
+    value = DateTime(year, month, day, h, m, s);
 
     if (minValue != null &&
         (value.millisecondsSinceEpoch < minValue.millisecondsSinceEpoch)) {
       value = minValue;
+      notifyDataChanged();
     } else if (maxValue != null &&
         value.millisecondsSinceEpoch > maxValue.millisecondsSinceEpoch) {
       value = maxValue;
+      notifyDataChanged();
     }
-    notifyDataChanged();
   }
 
   int _getAPColIndex() {
@@ -1266,23 +1337,49 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   }
 
   int _calcDateCount(int year, int month) {
-    if (leapYearMonths.contains(month)) {
-      return 31;
-    } else if (month == 2) {
-      if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
-        return 29;
+    switch (month) {
+      case 1:
+      case 3:
+      case 5:
+      case 7:
+      case 8:
+      case 10:
+      case 12:
+        return 31;
+      case 2: {
+        if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+          return 29;
+        }
+        return 28;
       }
-      return 28;
     }
     return 30;
   }
 
   String intToStr(int v) {
-    if (v < 10) return "0$v";
-    return "$v";
+    return (v < 10) ? "0$v" : "$v";
   }
 
   String _checkStr(String v) {
     return v == null ? "" : v;
+  }
+}
+
+class _StateView extends StatefulWidget {
+  final WidgetBuilder builder;
+  const _StateView({Key key, this.builder}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _StateViewState();
+}
+
+class _StateViewState extends State<_StateView> {
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context);
+  }
+
+  update() {
+    setState(() {});
   }
 }
