@@ -17,6 +17,9 @@ typedef PickerConfirmCallback = void Function(
 /// Picker value format callback.
 typedef PickerValueFormat<T> = String Function(T value);
 
+///Wrap child widget
+typedef WrapWidget = Widget Function(Widget child);
+
 /// Picker
 class Picker {
   static const double DefaultTextSize = 20.0;
@@ -73,7 +76,7 @@ class Picker {
 
   final Widget footer;
 
-  final Function container;
+  final WrapWidget container;
 
   final Decoration headerDecoration;
 
