@@ -70,6 +70,8 @@ class Picker {
 
   /// List item loop
   final bool looping;
+  /// Delay generation for smoother animation, This is the number of milliseconds to wait. It is recommended to > = 200
+  final int smooth;
 
   final Widget footer;
 
@@ -110,6 +112,7 @@ class Picker {
         this.headerDecoration,
         this.columnFlex,
         this.footer,
+        this.smooth,
         this.magnification = 1.0,
         this.diameterRatio = 1.1,
         this.squeeze = 1.45,
@@ -302,6 +305,15 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   @override
   Widget build(BuildContext context) {
     // print("picker build ${ref++}");
+    if (_wait && picker.smooth != null && picker.smooth > 0) {
+      Future.delayed(Duration(milliseconds: picker.smooth), () {
+        if (!_wait) return;
+        setState(() {
+          _wait = false;
+        });
+      });
+    } else
+      _wait = false;
 
     var _body = <Widget>[];
     if (!picker.hideHeader) {
@@ -322,9 +334,15 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
             ),
       ));
     }
-    _body.add(Row(
+    _body.add(_wait ? Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: _buildViews(),
+    ) : AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: _buildViews(),
+      ),
     ));
 
     if (picker.footer != null)
@@ -412,6 +430,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   }
 
   bool _changeing = false;
+  bool _wait = true;
   final Map<int, int> lastData = {};
 
   List<Widget> _buildViews() {
@@ -437,7 +456,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
             padding: picker.columnPadding,
             height: picker.height,
             decoration: _decoration,
-            child: _StateView(
+            child: _wait ? null : _StateView(
               key: _keys[i],
               builder: (context) {
                 adapter.setColumn(i - 1);
@@ -499,7 +518,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       }
     }
 
-    if (picker.delimiter != null) {
+    if (picker.delimiter != null && !_wait) {
       for (int i = 0; i < picker.delimiter.length; i++) {
         var o = picker.delimiter[i];
         if (o.child == null) continue;
@@ -513,9 +532,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       }
     }
 
-    if (picker.reversedOrder) {
+    if (picker.reversedOrder)
       return items.reversed.toList();
-    }
 
     return items;
   }
