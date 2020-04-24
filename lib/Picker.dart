@@ -442,16 +442,17 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
               builder: (context) {
                 adapter.setColumn(i - 1);
                 var _length = adapter.length;
-                var _view = CupertinoPicker(
+                var _view = CupertinoPicker.builder(
                   backgroundColor: picker.backgroundColor,
                   scrollController: scrollController[i],
                   itemExtent: picker.itemExtent,
-                  looping: picker.looping,
+                  // looping: picker.looping,
                   magnification: picker.magnification,
                   diameterRatio: picker.diameterRatio,
                   squeeze: picker.squeeze,
-                  onSelectedItemChanged: (int index) {
+                  onSelectedItemChanged: (int _index) {
                     if (__printDebug) print("onSelectedItemChanged");
+                    var index = _index % _length;
                     picker.selecteds[i] = index;
                     updateScrollController(i);
                     adapter.doSelect(i, index);
@@ -473,9 +474,11 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                     }
 
                   },
-                  children: List<Widget>.generate(_length, (int index) {
-                    return adapter.buildItem(context, index);
-                  }),
+                  itemBuilder: (context, index) {
+                    adapter.setColumn(i - 1);
+                    return adapter.buildItem(context, index % _length);
+                  },
+                  childCount: picker.looping ? null : _length,
                 );
 
                 if (!picker.changeToFirst && picker.selecteds[i] >= _length) {
@@ -721,6 +724,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
   var _lastColumn;
 
   void setColumn(int index) {
+    if (_col == index + 1) return;
     _col = index + 1;
     if (isArray) {
       if (__printDebug) print("index: $index");
@@ -893,11 +897,13 @@ class NumberPickerAdapter extends PickerAdapter<int> {
 
   @override
   void setColumn(int index) {
+    if (_col == index + 1)
+      return;
     _col = index + 1;
-    if (index + 1 >= data.length) {
+    if (_col >= data.length) {
       cur = null;
     } else {
-      cur = data[index + 1];
+      cur = data[_col];
     }
   }
 
