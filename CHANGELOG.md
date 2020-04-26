@@ -1,3 +1,7 @@
+## 1.1.4
+* performance optimization
+* Add a demo with a pop-up fillet background at the bottom.
+
 ## 1.1.3
 * return for showDialog , add barrierDismissible (thanks: Ali1Ammar)
 
