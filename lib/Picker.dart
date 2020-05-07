@@ -915,7 +915,7 @@ class NumberPickerAdapter extends PickerAdapter<int> {
 
   @override
   void setColumn(int index) {
-    if (_col == index + 1)
+    if (index != -1 && _col == index + 1)
       return;
     _col = index + 1;
     if (_col >= data.length) {
