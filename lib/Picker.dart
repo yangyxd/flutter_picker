@@ -742,7 +742,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
   var _lastColumn;
 
   void setColumn(int index) {
-    if (_col == index + 1) return;
+    if (_datas != null && _col == index + 1) return;
     _col = index + 1;
     if (isArray) {
       if (__printDebug) print("index: $index");
