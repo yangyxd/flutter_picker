@@ -498,16 +498,18 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                     if (picker.onSelect != null)
                       picker.onSelect(picker, i, picker.selecteds);
 
-                    _keys[i].currentState.update();
-                    if (adapter.isLinkage) {
-                      var _s = adapter.needUpdatePrev(i) ? 0 : i + 1;
-                      for (int j = _s; j < picker.selecteds.length; j++) {
-                        if (j == i) continue;
-                        adapter.setColumn(j - 1);
-                        _keys[j].currentState.update();
+                    if (adapter.needUpdatePrev(i))
+                      setState(() {});
+                    else {
+                      _keys[i].currentState.update();
+                      if (adapter.isLinkage) {
+                        for (int j = i + 1; j < picker.selecteds.length; j++) {
+                          if (j == i) continue;
+                          adapter.setColumn(j - 1);
+                          _keys[j].currentState.update();
+                        }
                       }
                     }
-
                   },
                   itemBuilder: (context, index) {
                     adapter.setColumn(i - 1);
@@ -521,7 +523,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                     if (__printDebug) print("timer last");
                     adapter.setColumn(i - 1);
                     var _len = adapter.length;
-                    scrollController[i].jumpToItem((_len < _length ? _len : _length)  - 1);
+                    var _index = (_len < _length ? _len : _length)  - 1;
+                    scrollController[i]?.jumpToItem(_index);
                   });
                 }
 
@@ -566,10 +569,6 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     _changeing = false;
   }
 
-  /// update column
-  void updateColumn(int index, int selectIndex) {
-    scrollController[index].jumpToItem(selectIndex);
-  }
 }
 
 /// 选择器数据适配器
@@ -675,8 +674,9 @@ abstract class PickerAdapter<T> {
     if (picker != null && picker.state != null) {
       picker.adapter.doShow();
       picker.adapter.initSelects();
-      for (int j = 0; j < picker.selecteds.length; j++)
+      for (int j = 0; j < picker.selecteds.length; j++) {
         picker.state.scrollController[j].jumpToItem(picker.selecteds[j]);
+      }
     }
   }
 }
@@ -1117,6 +1117,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   int _col = 0;
   int _colAP = -1;
   int _colHour = -1;
+  int _colDay = -1;
   int _yearBegin = 0;
   bool _needUpdatePrev = false;
 
@@ -1409,7 +1410,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         if (minHour != null || maxHour != null) {
           if (minHour != null && _colHour >= 0) {
             if (h < minHour) {
-              picker.state.updateColumn(_colHour, 0);
+              picker.selecteds[_colHour] = 0;
+              picker.updateColumn(_colHour);
               return;
             }
           }
@@ -1424,7 +1426,12 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         break;
     }
     int __day = _calcDateCount(year, month);
-    if (day > __day) day = __day;
+
+    bool _isChangeDay = false;
+    if (day > __day) {
+      day = __day;
+      _isChangeDay = true;
+    }
     value = DateTime(year, month, day, h, m, s);
 
     if (minValue != null &&
@@ -1435,12 +1442,16 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         value.millisecondsSinceEpoch > maxValue.millisecondsSinceEpoch) {
       value = maxValue;
       notifyDataChanged();
+    } else if (_isChangeDay && _colDay >= 0) {
+      doShow();
+      picker.updateColumn(_colDay);
     }
   }
 
   int _getAPColIndex() {
     List<int> items = customColumnType ?? columnType[type];
     _colHour = items.indexWhere((e) => e == 7);
+    _colDay = items.indexWhere((e) => e == 2);
     for (int i = 0; i < items.length; i++) {
       if (items[i] == 6) return i;
     }
