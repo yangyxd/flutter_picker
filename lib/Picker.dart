@@ -486,7 +486,9 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
                     _keys[i].currentState.update();
                     if (adapter.isLinkage) {
-                      for (int j = i + 1; j < picker.selecteds.length; j++) {
+                      var _s = adapter.needUpdatePrev(i) ? 0 : i + 1;
+                      for (int j = _s; j < picker.selecteds.length; j++) {
+                        if (j == i) continue;
                         adapter.setColumn(j - 1);
                         _keys[j].currentState.update();
                       }
@@ -560,6 +562,12 @@ abstract class PickerAdapter<T> {
   void setColumn(int index);
   void initSelects();
   Widget buildItem(BuildContext context, int index);
+
+  /// 是否需要更新前面的列
+  /// Need to update previous columns
+  bool needUpdatePrev(int curIndex) {
+    return false;
+  }
 
   Widget makeText(Widget child, String text, bool isSel) {
     return new Center(
@@ -739,15 +747,13 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     }
   }
 
-  var _lastColumn;
-
   void setColumn(int index) {
     if (_datas != null && _col == index + 1) return;
     _col = index + 1;
     if (isArray) {
       if (__printDebug) print("index: $index");
-      if (index + 1 < data.length)
-        _datas = data[index + 1].children;
+      if (_col < data.length)
+        _datas = data[_col].children;
       else
         _datas = null;
       return;
@@ -755,9 +761,8 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     if (index < 0) {
       _datas = data;
     } else {
-      if (_lastColumn != null && _lastColumn == index)
-        return;
       _datas = data;
+      // 列数过多会有性能问题
       for (int i = 0; i <= index; i++) {
         var j = picker.selecteds[i];
         if (_datas != null && _datas.length > j)
@@ -767,7 +772,6 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
           break;
         }
       }
-      _lastColumn = index;
     }
   }
 
@@ -1074,11 +1078,22 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     if (minValue != null && minValue.year > _yearBegin) {
       _yearBegin = minValue.year;
     }
+    // Judge whether the day is in front of the month
+    // If in the front, set "needUpdatePrev" = true
+    List<int> _columnType;
+    if (customColumnType != null)
+      _columnType = customColumnType;
+    else
+      _columnType = columnType[type];
+    var month = _columnType.indexWhere((element) => element == 1);
+    var day = _columnType.indexWhere((element) => element == 2);
+    _needUpdatePrev = day < month;
   }
 
   int _col = 0;
   int _colAP = -1;
   int _yearBegin = 0;
+  bool _needUpdatePrev = false;
 
   /// Currently selected value
   DateTime value;
@@ -1165,6 +1180,15 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     return customColumnType == null
         ? lengths[type].length
         : customColumnType.length;
+  }
+
+  @override
+  bool needUpdatePrev(int curIndex) {
+    if (_needUpdatePrev) {
+      var _curType = getColumnType(curIndex);
+      return _curType == 1 || _curType == 0;
+    }
+    return false;
   }
 
   @override
