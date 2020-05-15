@@ -5,7 +5,7 @@ author: yangyxd <yangyxd@126.com>
 homepage: https://github.com/yangyxd/flutter_picker
 
 environment:
-  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  sdk: ">=2.3.0 <3.0.0"
   flutter: ">=0.1.4 <3.0.0"
 
 dependencies:
