@@ -439,6 +439,8 @@ class _MyHomePageState extends State<MyHomePage> {
             daySuffix: "日",
             minHour: 8,
             maxHour: 19,
+            yearBegin: 1950,
+            yearEnd: 1998,
         ),
         title: new Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {

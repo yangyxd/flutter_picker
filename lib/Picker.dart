@@ -1335,7 +1335,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       int colType = getColumnType(i);
       switch (colType) {
         case 0:
-          picker.selecteds[i] = value.year - _yearBegin;
+          picker.selecteds[i] = yearEnd != null && value.year > yearEnd ? yearEnd - _yearBegin : value.year - _yearBegin;
           break;
         case 1:
           picker.selecteds[i] = value.month - 1;
