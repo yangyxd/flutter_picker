@@ -68,6 +68,9 @@ class Picker {
   /// Show pickers in reversed order
   final bool reversedOrder;
 
+  /// Generate a custom header， [hideHeader] = true
+  final WidgetBuilder builderHeader;
+
   /// List item loop
   final bool looping;
   /// Delay generation for smoother animation, This is the number of milliseconds to wait. It is recommended to > = 200
@@ -105,6 +108,7 @@ class Picker {
         this.backgroundColor = Colors.white,
         this.containerColor,
         this.headercolor,
+        this.builderHeader,
         this.changeToFirst = false,
         this.hideHeader = false,
         this.looping = false,
@@ -317,22 +321,32 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
     var _body = <Widget>[];
     if (!picker.hideHeader) {
-      _body.add(DecoratedBox(
-        child: Row(
-          children: _buildHeaderViews(),
-        ),
-        decoration: picker.headerDecoration ??
-            BoxDecoration(
-              border: Border(
-                top: BorderSide(color: theme.dividerColor, width: 0.5),
-                bottom:
-                BorderSide(color: theme.dividerColor, width: 0.5),
+      if (picker.builderHeader != null) {
+        _body.add(picker.headerDecoration == null ?
+          picker.builderHeader(context) :
+          DecoratedBox(
+            child: picker.builderHeader(context),
+            decoration: picker.headerDecoration
+          )
+        );
+      } else {
+        _body.add(DecoratedBox(
+          child: Row(
+            children: _buildHeaderViews(),
+          ),
+          decoration: picker.headerDecoration ??
+              BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: theme.dividerColor, width: 0.5),
+                  bottom:
+                  BorderSide(color: theme.dividerColor, width: 0.5),
+                ),
+                color: picker.headercolor == null
+                    ? theme.bottomAppBarColor
+                    : picker.headercolor,
               ),
-              color: picker.headercolor == null
-                  ? theme.bottomAppBarColor
-                  : picker.headercolor,
-            ),
-      ));
+        ));
+      }
     }
     _body.add(_wait ? Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -352,7 +366,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       children: _body,
     );
     if (widget.isModal != null && widget.isModal) {
-      v = GestureDetector(
+      return GestureDetector(
         onTap: () {},
         child: v,
       );
@@ -550,6 +564,11 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       }
     }
     _changeing = false;
+  }
+
+  /// update column
+  void updateColumn(int index, int selectIndex) {
+    scrollController[index].jumpToItem(selectIndex);
   }
 }
 
@@ -1007,6 +1026,9 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   /// year begin...end.
   final int yearBegin, yearEnd;
 
+  /// hour min ... max, min >= 0, max <= 23, max > min
+  final int minHour, maxHour;
+
   /// minimum datetime
   final DateTime minValue, maxValue;
 
@@ -1063,6 +1085,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.value,
     this.minValue,
     this.maxValue,
+    this.minHour,
+    this.maxHour,
     this.yearSuffix,
     this.monthSuffix,
     this.daySuffix,
@@ -1092,6 +1116,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
 
   int _col = 0;
   int _colAP = -1;
+  int _colHour = -1;
   int _yearBegin = 0;
   bool _needUpdatePrev = false;
 
@@ -1166,11 +1191,36 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       return ye - _yearBegin + 1;
     }
     if (v == 31) return _calcDateCount(value.year, value.month);
-    if (minuteInterval != null && minuteInterval > 1) {
-      int _type = getColumnType(_col);
-      if (_type == 4) {
-        return v ~/ minuteInterval;
-      }
+    int _type = getColumnType(_col);
+    switch (_type) {
+      case 3: // hour
+        if ((minHour != null && minHour >= 0) || (maxHour != null && maxHour <= 23))
+          return (maxHour ?? 23) - (minHour ?? 0) + 1;
+        break;
+      case 4: // minute
+        if (minuteInterval != null && minuteInterval > 1)
+          return v ~/ minuteInterval;
+        break;
+      case 7: // hour am/pm
+        if ((minHour != null && minHour >= 0) || (maxHour != null && maxHour <= 23))
+          if (_colAP == null || _colAP < 0) {
+            // I don't know am or PM
+            return 12;
+          } else {
+            var _min = 0;
+            var _max = 0;
+            if (picker.selecteds[_colAP] == 0) {
+              // am
+              _min = minHour == null ? 1 : minHour >= 12 ? 12 : minHour + 1;
+              _max = maxHour == null ? 12 : maxHour >= 12 ? 12 : maxHour + 1;
+            } else {
+              // pm
+              _min = minHour == null ? 1 : minHour >= 12 ? 24 - minHour - 12 : 1;
+              _max = maxHour == null ? 12 : maxHour >= 12 ? maxHour - 12 : 1;
+            }
+            return _max > _min ? _max - _min + 1 : _min - _max + 1;
+          }
+        break;
     }
     return v;
   }
@@ -1239,6 +1289,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         _text = "${index + 1}${_checkStr(daySuffix)}";
         break;
       case 3:
+        _text = "${intToStr(index + (minHour ?? 0))}";
+        break;
       case 5:
         _text = "${intToStr(index)}";
         break;
@@ -1254,7 +1306,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         _text = "${_ampm[index]}";
         break;
       case 7:
-        _text = "${intToStr(index + 1)}";
+        _text = "${intToStr(index + (minHour == null ? 0 : (picker.selecteds[_colAP] == 0 ? minHour : 0)) + 1)}";
         break;
     }
 
@@ -1336,7 +1388,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         day = index + 1;
         break;
       case 3:
-        h = index;
+        h = index + (minHour ?? 0);
         break;
       case 4:
         m = (minuteInterval == null || minuteInterval < 2)
@@ -1354,9 +1406,19 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           if (h < 12) h = h + 12;
           if (h == 12) h = 0;
         }
+        if (minHour != null || maxHour != null) {
+          if (minHour != null && _colHour >= 0) {
+            if (h < minHour) {
+              picker.state.updateColumn(_colHour, 0);
+              return;
+            }
+          }
+          if (maxHour != null && h > maxHour)
+            h = maxHour;
+        }
         break;
       case 7:
-        h = index + 1;
+        h = index + (minHour == null ? 0 : (picker.selecteds[_colAP] == 0 ? minHour : 0)) + 1;
         if (_colAP >= 0 && picker.selecteds[_colAP] == 1) h = h + 12;
         if (h > 23) h = 0;
         break;
@@ -1378,6 +1440,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
 
   int _getAPColIndex() {
     List<int> items = customColumnType ?? columnType[type];
+    _colHour = items.indexWhere((e) => e == 7);
     for (int i = 0; i < items.length; i++) {
       if (items[i] == 6) return i;
     }

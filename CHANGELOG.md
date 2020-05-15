@@ -1,3 +1,8 @@
+## 1.1.5
+* Repair BUG (Including the problem of datetime adapter before the month, add the needUpdatePrev interface to the adapter)
+* add builderHeader params. Allow custom headers to be generated.
+* DateTimePickerAdapter add minHour, maxHour.
+
 ## 1.1.4
 * performance optimization
 * Add a demo with a pop-up fillet background at the bottom.

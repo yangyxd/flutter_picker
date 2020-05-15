@@ -342,6 +342,8 @@ class _MyHomePageState extends State<MyHomePage> {
           daySuffix: "日",
           minValue: DateTime.now(),
           minuteInterval: 30,
+          minHour: 1,
+          maxHour: 23,
           // twoDigitYear: true,
         ),
         title: new Text("Select DateTime"),
@@ -434,7 +436,9 @@ class _MyHomePageState extends State<MyHomePage> {
             isNumberMonth: true,
             yearSuffix: "年",
             monthSuffix: "月",
-            daySuffix: "日"
+            daySuffix: "日",
+            minHour: 8,
+            maxHour: 19,
         ),
         title: new Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {
