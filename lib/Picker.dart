@@ -485,6 +485,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                   squeeze: picker.squeeze,
                   onSelectedItemChanged: (int _index) {
                     if (__printDebug) print("onSelectedItemChanged");
+                    if (_length <= 0) return;
                     var index = _index % _length;
                     picker.selecteds[i] = index;
                     updateScrollController(i);
