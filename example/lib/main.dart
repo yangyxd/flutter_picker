@@ -1,22 +1,29 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'PickerData.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => new _MyAppState();
+  _MyAppState createState() => _MyAppState();
 }
 
+final String _fontFamily = Platform.isWindows ? "Roboto" : "";
+
 class _MyAppState extends State<MyApp> {
+
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
         theme: ThemeData(
           primarySwatch: Colors.blue,
+          fontFamily: _fontFamily,
+          primaryTextTheme: TextTheme().apply(fontFamily: _fontFamily),
         ),
 
         localizationsDelegates: [
@@ -33,7 +40,7 @@ class _MyAppState extends State<MyApp> {
           const Locale('tr','TR')
         ],
 
-        home: new MyHomePage());
+        home: MyHomePage());
   }
 }
 
@@ -45,14 +52,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final double listSpec = 4.0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String stateText;
+  String stateText = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Picker'),
+        title: Text('Picker ${stateText.isEmpty ? "" : " - " + stateText}'),
         automaticallyImplyLeading: false,
         elevation: 0.0,
       ),
@@ -61,87 +68,75 @@ class _MyHomePageState extends State<MyHomePage> {
         alignment: Alignment.topCenter,
         child: ListView(
           children: <Widget>[
-            (stateText != null) ? Text(stateText) : Container(),
-            RaisedButton(
-              child: Text('Picker Show'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show'),
+              onTap: () {
                 showPicker(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Modal'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Modal'),
+              onTap: () {
                 showPickerModal(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Icons'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Icons'),
+              onTap: () {
                 showPickerIcons(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show (Array)'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show (Array)'),
+              onTap: () {
                 showPickerArray(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Number'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Number'),
+              onTap: () {
                 showPickerNumber(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Number FormatValue'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Number FormatValue'),
+              onTap: () {
                 showPickerNumberFormatValue(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Date'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Date'),
+              onTap: () {
                 showPickerDate(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Datetime'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Datetime'),
+              onTap: () {
                 showPickerDateTime(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Date (Custom)'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Date (Custom)'),
+              onTap: () {
                 showPickerDateCustom(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Datetime (24)'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Datetime (24)'),
+              onTap: () {
                 showPickerDateTime24(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Datetime (Round background)'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Datetime (Round background)'),
+              onTap: () {
                 showPickerDateTimeRoundBg(context);
               },
             ),
-            SizedBox(height: listSpec),
-            RaisedButton(
-              child: Text('Picker Show Date Range'),
-              onPressed: () {
+            ListTile(
+              title: Text('Picker Show Date Range'),
+              onTap: () {
                 showPickerDateRange(context);
               },
             ),
@@ -156,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
       adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
       changeToFirst: false,
       textAlign: TextAlign.left,
-      textStyle: const TextStyle(color: Colors.blue),
+      textStyle: TextStyle(color: Colors.blue, fontFamily: _fontFamily),
       selectedTextStyle: TextStyle(color: Colors.red),
       columnPadding: const EdgeInsets.all(8.0),
       onConfirm: (Picker picker, List value) {
@@ -224,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Picker(
         adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
         hideHeader: true,
-        title: new Text("Select Data"),
+        title: Text("Select Data"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
@@ -236,14 +231,14 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerArray(BuildContext context) {
     Picker(
         adapter: PickerDataAdapter<String>(
-            pickerdata: JsonDecoder().convert(PickerData2),
-            isArray: true,
+          pickerdata: JsonDecoder().convert(PickerData2),
+          isArray: true,
         ),
         hideHeader: true,
         selecteds: [3, 0, 2],
         title: Text("Please Select"),
         selectedTextStyle: TextStyle(color: Colors.blue),
-        cancel: FlatButton(onPressed: () {
+        cancel: TextButton(onPressed: () {
           Navigator.pop(context);
         }, child: Icon(Icons.child_care)),
         onConfirm: (Picker picker, List value) {
@@ -318,12 +313,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerDateCustom(BuildContext context) {
-    new Picker(
+    Picker(
         hideHeader: true,
-        adapter: new DateTimePickerAdapter(
+        adapter: DateTimePickerAdapter(
           customColumnType: [2,1,0,3,4],
         ),
-        title: new Text("Select Data"),
+        title: Text("Select Data"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           print((picker.adapter as DateTimePickerAdapter).value);
@@ -332,8 +327,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerDateTime(BuildContext context) {
-    new Picker(
-        adapter: new DateTimePickerAdapter(
+    Picker(
+        adapter: DateTimePickerAdapter(
           type: PickerDateTimeType.kYMD_AP_HM,
           isNumberMonth: true,
           //strAMPM: const["上午", "下午"],
@@ -346,7 +341,7 @@ class _MyHomePageState extends State<MyHomePage> {
           maxHour: 23,
           // twoDigitYear: true,
         ),
-        title: new Text("Select DateTime"),
+        title: Text("Select DateTime"),
         textAlign: TextAlign.right,
         selectedTextStyle: TextStyle(color: Colors.blue),
         delimiter: [
@@ -376,41 +371,41 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerDateRange(BuildContext context) {
     print("canceltext: ${PickerLocalizations.of(context).cancelText}");
 
-    Picker ps = new Picker(
+    Picker ps = Picker(
         hideHeader: true,
-        adapter: new DateTimePickerAdapter(type: PickerDateTimeType.kYMD, isNumberMonth: true),
+        adapter: DateTimePickerAdapter(type: PickerDateTimeType.kYMD, isNumberMonth: true),
         onConfirm: (Picker picker, List value) {
           print((picker.adapter as DateTimePickerAdapter).value);
         }
     );
 
-    Picker pe = new Picker(
+    Picker pe = Picker(
         hideHeader: true,
-        adapter: new DateTimePickerAdapter(type: PickerDateTimeType.kYMD),
+        adapter: DateTimePickerAdapter(type: PickerDateTimeType.kYMD),
         onConfirm: (Picker picker, List value) {
           print((picker.adapter as DateTimePickerAdapter).value);
         }
     );
 
     List<Widget> actions = [
-      FlatButton(
+      TextButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          child: new Text(PickerLocalizations.of(context).cancelText)),
-      FlatButton(
+          child: Text(PickerLocalizations.of(context).cancelText)),
+      TextButton(
           onPressed: () {
             Navigator.pop(context);
             ps.onConfirm(ps, ps.selecteds);
             pe.onConfirm(pe, pe.selecteds);
           },
-          child: new Text(PickerLocalizations.of(context).confirmText))
+          child: Text(PickerLocalizations.of(context).confirmText))
     ];
 
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return new AlertDialog(
+          return AlertDialog(
             title: Text("Select Date Range"),
             actions: actions,
             content: Container(
@@ -430,8 +425,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerDateTime24(BuildContext context) {
-    new Picker(
-        adapter: new DateTimePickerAdapter(
+    Picker(
+        adapter: DateTimePickerAdapter(
             type: PickerDateTimeType.kMDYHM,
             isNumberMonth: true,
             yearSuffix: "年",
@@ -442,7 +437,7 @@ class _MyHomePageState extends State<MyHomePage> {
             yearBegin: 1950,
             yearEnd: 1998,
         ),
-        title: new Text("Select DateTime"),
+        title: Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         },
@@ -461,7 +456,7 @@ class _MyHomePageState extends State<MyHomePage> {
         headerDecoration: BoxDecoration(
             border: Border(bottom: BorderSide(color: Colors.black12, width: 0.5))
         ),
-        adapter: new DateTimePickerAdapter(
+        adapter: DateTimePickerAdapter(
             type: PickerDateTimeType.kMDYHM,
             isNumberMonth: true,
             yearSuffix: "年",
@@ -480,7 +475,7 @@ class _MyHomePageState extends State<MyHomePage> {
             color: Colors.white,
           )),
         ],
-        title: new Text("Select DateTime"),
+        title: Text("Select DateTime"),
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         },

@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 
 abstract class PickerLocalizationsBase {
-  final Locale locale;
+  final Locale? locale;
   const PickerLocalizationsBase(this.locale);
-  Object getItem(String key);
-  String get cancelText => getItem('cancelText');
-  String get confirmText => getItem('confirmText');
-  List get ampm => getItem('ampm');
-  List get months => getItem('months');
-  List get monthsLong => getItem('monthsLong');
+  Object? getItem(String key);
+  String? get cancelText => getItem('cancelText') as String;
+  String? get confirmText => getItem('confirmText') as String;
+  List? get ampm => getItem('ampm') as List;
+  List? get months => getItem('months') as List;
+  List? get monthsLong => getItem('monthsLong') as List;
 }
 
 /// localizations
 class PickerLocalizations extends PickerLocalizationsBase {
-  static PickerLocalizations _static = new PickerLocalizations(null);
-  const PickerLocalizations(Locale locale): super(locale);
+  static PickerLocalizations _static = PickerLocalizations(null);
+  const PickerLocalizations(Locale? locale): super(locale);
 
   @override
-  Object getItem(String key) {
-    Map localData;
-    if (locale != null)  localData = localizedValues[locale.languageCode];
-    if (localData == null) return localizedValues['en'][key];
+  Object? getItem(String key) {
+    Map? localData;
+    if (locale != null) {
+      localData = localizedValues[locale!.languageCode];
+    }
+    if (localData == null) return localizedValues['en']![key];
     return localData[key];
   }
 
