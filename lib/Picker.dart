@@ -426,7 +426,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
               : DefaultTextStyle(
               style: TextStyle(
                   fontSize: Picker.DefaultTextSize,
-                  fontFamily: theme!.textTheme!.headline6!.fontFamily,
+                  fontFamily: theme!.textTheme.headline6!.fontFamily,
                   color: theme!.textTheme.headline6!.color),
               child: picker.title!),
         )));
@@ -436,7 +436,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           style: picker.confirmTextStyle ??
               TextStyle(
                   color: theme!.accentColor,
-                  fontFamily: theme!.textTheme!.headline6!.fontFamily,
+                  fontFamily: theme!.textTheme.headline6!.fontFamily,
                   fontSize: Picker.DefaultTextSize),
           child: picker.confirm!));
     } else {
@@ -453,7 +453,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                 style: picker.confirmTextStyle ??
                     TextStyle(
                         color: theme!.accentColor,
-                        fontFamily: theme!.textTheme!.headline6!.fontFamily,
+                        fontFamily: theme!.textTheme.headline6!.fontFamily,
                         fontSize: Picker.DefaultTextSize))));
       }
     }
@@ -625,7 +625,7 @@ abstract class PickerAdapter<T> {
                 TextStyle(
                     color: Colors.black87,
                     fontFamily: picker?.state?.context != null
-                        ? Theme.of(picker!.state!.context).textTheme!.headline6!.fontFamily
+                        ? Theme.of(picker!.state!.context).textTheme.headline6!.fontFamily
                         : "",
                     fontSize: Picker.DefaultTextSize),
             child: child != null ? child :

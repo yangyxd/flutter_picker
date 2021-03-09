@@ -1,3 +1,7 @@
+## 2.0.0
+* Support Null safety
+* Optimize code, Update demo list
+
 ## 1.1.5
 * Repair BUG (Including the problem of datetime adapter before the month, add the needUpdatePrev interface to the adapter)
 * add builderHeader params. Allow custom headers to be generated.
