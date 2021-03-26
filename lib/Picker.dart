@@ -176,7 +176,9 @@ class Picker {
                   style: _getButtonStyle(Theme.of(context)),
                   onPressed: () {
                     Navigator.pop<List<int>>(context, null);
-                    onCancel!();
+                    if(onCancel != null) {
+                      onCancel!();
+                    };
                   },
                   child: cancelTextStyle == null
                       ? Text(_cancelText)
