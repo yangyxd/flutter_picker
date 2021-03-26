@@ -162,17 +162,34 @@ class _MyHomePageState extends State<MyHomePage> {
     picker.show(_scaffoldKey.currentState);
   }
 
-  showPickerModal(BuildContext context) {
-    Picker(
+  showPickerModal(BuildContext context) async {
+    final result = await Picker(
       adapter: PickerDataAdapter<String>(pickerdata: JsonDecoder().convert(PickerData)),
       changeToFirst: true,
       hideHeader: false,
       selectedTextStyle: TextStyle(color: Colors.blue),
-      onConfirm: (Picker picker, List value) {
+      // builderHeader: (context) {
+      //   final picker = PickerWidget.of(context);
+      //   return picker?.data?.title ?? Text("xxx");
+      // },
+      onConfirm: (picker, value) {
         print(value.toString());
         print(picker.adapter.text);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(
+          appBar: AppBar(title: Text("Hello")),
+          body: Center(child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("You click the Confirm button."),
+              SizedBox(height: 32),
+              Text("result: \n ${picker.adapter.text}")
+            ],
+          )),
+        )));
       }
-    ).showModal(this.context); //_scaffoldKey.currentState);
+    ).showModal(this.context); //_sca
+    print("result: $result");// ffoldKey.currentState);
   }
 
   showPickerIcons(BuildContext context) {
@@ -182,7 +199,11 @@ class _MyHomePageState extends State<MyHomePage> {
             PickerItem(text: Icon(Icons.more)),
             PickerItem(text: Icon(Icons.aspect_ratio)),
             PickerItem(text: Icon(Icons.android)),
-            PickerItem(text: Icon(Icons.menu)),
+            PickerItem(text: Icon(Icons.menu), children: [
+              // 测试：多加了一维数据
+              PickerItem(text: Icon(Icons.account_box)),
+              PickerItem(text: Icon(Icons.analytics)),
+            ]),
           ]),
           PickerItem(text: Icon(Icons.title), value: Icons.title, children: [
             PickerItem(text: Icon(Icons.more_vert)),
@@ -206,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
           PickerItem(text: Icon(Icons.close), value: Icons.close),
         ]),
         title: Text("Select Icon"),
-        selectedTextStyle: TextStyle(color: Colors.blue),
+        selectedTextStyle: TextStyle(color: Colors.blue, fontSize: 12),
         onConfirm: (Picker picker, List value) {
           print(value.toString());
           print(picker.getSelectedValues());

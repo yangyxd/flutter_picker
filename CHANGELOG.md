@@ -1,5 +1,7 @@
 ## 2.0.1
 * Fixed bug.
+* Add PickerWidget.of(context) Get Picker
+* Add selectedIconTheme property
 
 ## 2.0.0
 * Support Null safety
