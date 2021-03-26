@@ -192,7 +192,6 @@ class Picker {
                     if (onCancel != null) {
                       onCancel!();
                     }
-                    ;
                   },
                   child: cancelTextStyle == null
                       ? Text(_cancelText)
