@@ -146,6 +146,7 @@ class Picker {
     adapter.picker = this;
     adapter.initSelects();
     _widget = PickerWidget(
+      key: ValueKey(this),
       child:
           _PickerWidget(picker: this, themeData: themeData, isModal: isModal),
       data: this,
@@ -161,7 +162,8 @@ class Picker {
   }
 
   /// Display modal picker
-  Future<T?> showModal<T>(BuildContext context, [ThemeData? themeData, bool isScrollControlled = false]) async {
+  Future<T?> showModal<T>(BuildContext context,
+      [ThemeData? themeData, bool isScrollControlled = false]) async {
     return await showModalBottomSheet<T>(
         context: context, //state.context,
         isScrollControlled: isScrollControlled,
@@ -572,15 +574,21 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                         childCount: picker.looping ? null : _length,
                       );
 
-                      if (_lastIsEmpty || (!picker.changeToFirst && picker.selecteds[i] >= _length)) {
+                      if (_lastIsEmpty ||
+                          (!picker.changeToFirst &&
+                              picker.selecteds[i] >= _length)) {
                         Timer(Duration(milliseconds: 100), () {
                           if (!this.mounted) return;
                           if (__printDebug) print("timer last");
                           var _len = adapter.length;
                           var _index = (_len < _length ? _len : _length) - 1;
-                          if (scrollController[i].position.hasContentDimensions) {
+                          if (scrollController[i]
+                              .position
+                              .hasContentDimensions) {
                             scrollController[i].jumpToItem(_index);
                           } else {
+                            scrollController[i] = FixedExtentScrollController(
+                                initialItem: _index);
                             state(() => null);
                           }
                         });
@@ -619,7 +627,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     _changeing = true;
     for (int j = 0; j < picker.selecteds.length; j++) {
       if (j != i) {
-        if (scrollController[j].hasClients && scrollController[j].position.hasContentDimensions)
+        if (scrollController[j].hasClients &&
+            scrollController[j].position.hasContentDimensions)
           scrollController[j].position.notifyListeners();
       }
     }
@@ -1444,7 +1453,11 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           picker!.selecteds[i] = value!.day - 1;
           break;
         case 3:
-          picker!.selecteds[i] = value!.hour;
+          var h = value!.hour;
+          if ((minHour != null && minHour! >= 0) ||
+              (maxHour != null && maxHour! <= 23))
+            h = (maxHour ?? 23) - (minHour ?? 0) + 1;
+          picker!.selecteds[i] = h;
           break;
         case 4:
           picker!.selecteds[i] = minuteInterval == null || minuteInterval! < 2
