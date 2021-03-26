@@ -223,15 +223,15 @@ class Picker {
 
   /// 取消
   void doCancel(BuildContext context) {
-    if (onCancel != null) onCancel!();
     Navigator.of(context).pop<List<int>>(null);
+    if (onCancel != null) onCancel!();
     _widget = null;
   }
 
   /// 确定
   void doConfirm(BuildContext context) {
-    if (onConfirm != null) onConfirm!(this, selecteds);
     Navigator.of(context).pop();
+    if (onConfirm != null) onConfirm!(this, selecteds);
     _widget = null;
   }
 

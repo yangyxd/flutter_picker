@@ -1,3 +1,6 @@
+## 2.0.1
+* Fixed bug.
+
 ## 2.0.0
 * Support Null safety
 * Optimize code, Update demo list
