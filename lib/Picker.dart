@@ -484,7 +484,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     return items;
   }
 
-  bool _changeing = false;
+  bool _changing = false;
   bool _wait = true;
   final Map<int, int> lastData = {};
 
@@ -622,8 +622,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   }
 
   void updateScrollController(int i) {
-    if (_changeing || !(picker.adapter.isLinkage)) return;
-    _changeing = true;
+    if (_changing || !(picker.adapter.isLinkage)) return;
+    _changing = true;
     for (int j = 0; j < picker.selecteds.length; j++) {
       if (j != i) {
         if (scrollController[j].hasClients &&
@@ -631,14 +631,14 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           scrollController[j].position.notifyListeners();
       }
     }
-    _changeing = false;
+    _changing = false;
   }
 
   @override
   void debugFillProperties(properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<bool>('_changeing', _changeing));
-    properties.add(DiagnosticsProperty<bool>('_changeing', _changeing));
+    properties.add(DiagnosticsProperty<bool>('_changing', _changing));
+    properties.add(DiagnosticsProperty<bool>('_changing', _changing));
   }
 }
 
