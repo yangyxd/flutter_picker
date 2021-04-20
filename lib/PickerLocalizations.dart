@@ -14,7 +14,7 @@ abstract class PickerLocalizationsBase {
 /// localizations
 class PickerLocalizations extends PickerLocalizationsBase {
   static PickerLocalizations _static = PickerLocalizations(null);
-  const PickerLocalizations(Locale? locale): super(locale);
+  const PickerLocalizations(Locale? locale) : super(locale);
 
   @override
   Object? getItem(String key) {
@@ -27,11 +27,23 @@ class PickerLocalizations extends PickerLocalizationsBase {
   }
 
   static PickerLocalizations of(BuildContext context) {
-    return Localizations.of<PickerLocalizations>(context, PickerLocalizations) ?? _static;
+    return Localizations.of<PickerLocalizations>(
+            context, PickerLocalizations) ??
+        _static;
   }
 
   /// Language Support
-  static const List<String> languages = ['en', 'zh', 'ko', 'it', 'ar', 'fr', 'es', 'tr'];
+  static const List<String> languages = [
+    'en',
+    'jp',
+    'zh',
+    'ko',
+    'it',
+    'ar',
+    'fr',
+    'es',
+    'tr'
+  ];
 
   /// Language Values
   static const Map<String, Map<String, Object>> localizedValues = {
@@ -39,6 +51,11 @@ class PickerLocalizations extends PickerLocalizationsBase {
       'cancelText': 'Cancel',
       'confirmText': 'Confirm',
       'ampm': ['AM', 'PM'],
+    },
+    'jp': {
+      'cancelText': 'キャンセル',
+      'confirmText': '完了',
+      'ampm': ['午前', '午後'],
     },
     'zh': {
       'cancelText': '取消',
@@ -55,7 +72,7 @@ class PickerLocalizations extends PickerLocalizationsBase {
       'confirmText': 'Conferma',
       'ampm': ['AM', 'PM'],
     },
-    'ar':{
+    'ar': {
       'cancelText': 'إلغاء الأمر',
       'confirmText': 'تأكيد',
       'ampm': ['صباحاً', 'مساءً'],
@@ -104,6 +121,4 @@ class PickerLocalizations extends PickerLocalizationsBase {
       ]
     },
   };
-
 }
-
