@@ -35,7 +35,7 @@ class PickerLocalizations extends PickerLocalizationsBase {
   /// Language Support
   static const List<String> languages = [
     'en',
-    'jp',
+    'ja',
     'zh',
     'ko',
     'it',
@@ -52,7 +52,7 @@ class PickerLocalizations extends PickerLocalizationsBase {
       'confirmText': 'Confirm',
       'ampm': ['AM', 'PM'],
     },
-    'jp': {
+    'ja': {
       'cancelText': 'キャンセル',
       'confirmText': '完了',
       'ampm': ['午前', '午後'],
