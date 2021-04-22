@@ -263,7 +263,7 @@ class Picker {
   }
 
   static ButtonStyle _getButtonStyle(ButtonThemeData? theme) => ButtonStyle(
-      // minimumSize: MaterialStateProperty.all(Size(theme?.minWidth ?? 0.0, 42)),
+      minimumSize: MaterialStateProperty.all(Size(theme?.minWidth ?? 0.0, 42)),
       padding: MaterialStateProperty.all(theme?.padding));
 }
 
@@ -418,8 +418,9 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       {required String text,
       required VoidCallback onPressed,
       TextStyle? style}) {
-    return TextButton(
-        style: Picker._getButtonStyle(ButtonTheme.of(context)),
+    return CupertinoButton(
+        pressedOpacity: 0.3,
+        padding: EdgeInsets.only(left: 16, right: 16, top: 0),
         onPressed: onPressed,
         child: Text(text,
             overflow: TextOverflow.ellipsis,
