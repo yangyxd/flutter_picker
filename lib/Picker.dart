@@ -263,7 +263,7 @@ class Picker {
   }
 
   static ButtonStyle _getButtonStyle(ButtonThemeData? theme) => ButtonStyle(
-      minimumSize: MaterialStateProperty.all(Size(theme?.minWidth ?? 0.0, 42)),
+      // minimumSize: MaterialStateProperty.all(Size(theme?.minWidth ?? 0.0, 42)),
       padding: MaterialStateProperty.all(theme?.padding));
 }
 
