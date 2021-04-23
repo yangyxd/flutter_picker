@@ -374,10 +374,10 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           ),
           decoration: picker.headerDecoration ??
               BoxDecoration(
-                // border: Border(
-                //   top: BorderSide(color: theme!.dividerColor, width: 0.5),
-                //   bottom: BorderSide(color: theme!.dividerColor, width: 0.5),
-                // ),
+                border: Border(
+                  top: BorderSide(color: theme!.dividerColor, width: 0.5),
+                  bottom: BorderSide(color: theme!.dividerColor, width: 0.5),
+                ),
                 color: picker.headerColor == null
                     ? (theme!.bottomAppBarColor)
                     : picker.headerColor,
@@ -418,9 +418,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       {required String text,
       required VoidCallback onPressed,
       TextStyle? style}) {
-    return CupertinoButton(
-        pressedOpacity: 0.3,
-        padding: EdgeInsets.only(left: 16, right: 16, top: 0),
+    return TextButton(
+        style: Picker._getButtonStyle(ButtonTheme.of(context)),
         onPressed: onPressed,
         child: Text(text,
             overflow: TextOverflow.ellipsis,
