@@ -27,23 +27,11 @@ class PickerLocalizations extends PickerLocalizationsBase {
   }
 
   static PickerLocalizations of(BuildContext context) {
-    return Localizations.of<PickerLocalizations>(
-            context, PickerLocalizations) ??
-        _static;
+    return Localizations.of<PickerLocalizations>(context, PickerLocalizations) ?? _static;
   }
 
   /// Language Support
-  static const List<String> languages = [
-    'en',
-    'ja',
-    'zh',
-    'ko',
-    'it',
-    'ar',
-    'fr',
-    'es',
-    'tr'
-  ];
+  static const List<String> languages = ['en', 'ja', 'zh', 'ko', 'it', 'ar', 'fr', 'es', 'tr'];
 
   /// Language Values
   static const Map<String, Map<String, Object>> localizedValues = {
