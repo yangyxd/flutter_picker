@@ -1120,7 +1120,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   final int? minuteInterval;
 
   /// Year, month, day suffix
-  final String? yearSuffix, monthSuffix, daySuffix;
+  final String? yearSuffix, monthSuffix, daySuffix, hourSuffix, minuteSuffix, secondSuffix;
 
   /// use two-digit year, 2019, displayed as 19
   final bool twoDigitYear;
@@ -1171,6 +1171,9 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     this.maxValue,
     this.minHour,
     this.maxHour,
+    this.secondSuffix,
+    this.minuteSuffix,
+    this.hourSuffix,
     this.yearSuffix,
     this.monthSuffix,
     this.daySuffix,
@@ -1395,16 +1398,16 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         _text = "${index + 1}${_checkStr(daySuffix)}";
         break;
       case 3:
-        _text = "${intToStr(index + (minHour ?? 0))}";
+        _text = "${intToStr(index + (minHour ?? 0))}${_checkStr(hourSuffix)}";
         break;
       case 5:
-        _text = "${intToStr(index)}";
+        _text = "${intToStr(index)}${_checkStr(secondSuffix)}";
         break;
       case 4:
         if (minuteInterval == null || minuteInterval! < 2)
-          _text = "${intToStr(index)}";
+          _text = "${intToStr(index)}${_checkStr(minuteSuffix)}";
         else
-          _text = "${intToStr(index * minuteInterval!)}";
+          _text = "${intToStr(index * minuteInterval!)}${_checkStr(minuteSuffix)}";
         break;
       case 6:
         List? _ampm = strAMPM ?? PickerLocalizations.of(context).ampm;
