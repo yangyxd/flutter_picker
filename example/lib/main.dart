@@ -140,10 +140,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 showPickerDateRange(context);
               },
             ),
+            ListTile(
+              title: Text('13. DurationPicker (time)'),
+              onTap: () {
+                showPickerDurationSelect(context);
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  showMsg(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   showPicker(BuildContext context) {
@@ -350,7 +360,7 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerDateTime(BuildContext context) {
     Picker(
         adapter: DateTimePickerAdapter(
-          type: PickerDateTimeType.kYMD_AP_HM,
+          type: PickerDateTimeType.kMDYHM_AP,
           isNumberMonth: true,
           //strAMPM: const["上午", "下午"],
           yearSuffix: "年",
@@ -361,8 +371,8 @@ class _MyHomePageState extends State<MyHomePage> {
           secondSuffix: "秒",
           minValue: DateTime.now(),
           minuteInterval: 30,
-          minHour: 1,
-          maxHour: 23,
+          //minHour: 1,
+          //maxHour: 23,
           // twoDigitYear: true,
         ),
         title: Text("Select DateTime"),
@@ -384,8 +394,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         },
-        onSelect: (Picker picker, int index, List<int> selecteds) {
-          this.setState(() {
+        onSelect: (Picker picker, int index, List<int> selected) {
+          setState(() {
             stateText = picker.adapter.toString();
           });
         }
@@ -468,10 +478,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         },
-        onSelect: (Picker picker, int index, List<int> selecteds) {
-          this.setState(() {
-            stateText = picker.adapter.toString();
-          });
+        onSelect: (Picker picker, int index, List<int> selected) {
+          showMsg(picker.adapter.toString());
         }
     ).show(_scaffoldKey.currentState);
   }
@@ -506,10 +514,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         },
-        onSelect: (Picker picker, int index, List<int> selecteds) {
-          this.setState(() {
-            stateText = picker.adapter.toString();
-          });
+        onSelect: (Picker picker, int index, List<int> selected) {
+          showMsg(picker.adapter.toString());
         }
     );
 
@@ -521,6 +527,70 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.only(top: 4),
           child: picker.makePicker(null, true),
         )
+      );
+    });
+  }
+
+  showPickerDurationSelect(BuildContext context) {
+    final range = <DateTime>[DateTime(0, 1, 1, 8, 30), DateTime(0, 1, 1, 14, 30)];
+    final p1 = Picker(
+        adapter: DateTimePickerAdapter(
+          customColumnType: [6,7,4],
+          value: range[0],
+        ),
+        delimiter: [
+          PickerDelimiter(column: 0, child: Container(
+            alignment: Alignment.center,
+            width: 100,
+            padding: EdgeInsets.fromLTRB(12, 0, 8, 0),
+            child: Text('Start', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 14)),
+            color: Colors.white,
+          )),
+        ],
+        onSelect: (Picker picker, int index, List<int> selected) {
+          range[0] = (picker.adapter as DateTimePickerAdapter).value;
+        },
+        onConfirmBefore: (picker, selected) async {
+          if (range[0] == null) {
+            showMsg("Please select the start time.");
+            return false;
+          }
+          if (range[1] == null) {
+            showMsg("Please select the end time.");
+            return false;
+          }
+          return true;
+        },
+        onConfirm: (picker, selected) {
+          showMsg("Start: ${range[0].toString()}, End: ${range[1].toString()}, ${picker.adapter}");
+        }
+    );
+    final p2 = Picker(
+        adapter: DateTimePickerAdapter(
+          customColumnType: [6,7,4],
+          value: range[1],
+        ),
+        hideHeader: true,
+        delimiter: [
+          PickerDelimiter(column: 0, child: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.fromLTRB(12, 0, 8, 0),
+            width: 100,
+            child: Text('End', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 14)),
+            color: Colors.white,
+          )),
+        ],
+        onSelect: (Picker picker, int index, List<int> selected) {
+          range[1] = (picker.adapter as DateTimePickerAdapter).value;
+        }
+    );
+    _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          p1.makePicker(),
+          p2.makePicker()
+        ],
       );
     });
   }

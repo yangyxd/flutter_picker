@@ -1,3 +1,9 @@
+## 2.0.2
+
+# Fixed bug: #142, #98
+# Add demo DurationPicker
+# Add onConfirmBefore callback event;
+
 ## 2.0.1
 * Fixed bug.
 * Add PickerWidget.of(context) Get Picker

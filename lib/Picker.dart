@@ -9,11 +9,15 @@ const bool __printDebug = false;
 
 /// Picker selected callback.
 typedef PickerSelectedCallback = void Function(
-    Picker picker, int index, List<int> selecteds);
+    Picker picker, int index, List<int> selected);
 
 /// Picker confirm callback.
 typedef PickerConfirmCallback = void Function(
-    Picker picker, List<int> selecteds);
+    Picker picker, List<int> selected);
+
+/// Picker confirm before callback.
+typedef PickerConfirmBeforeCallback = Future<bool> Function(
+    Picker picker, List<int> selected);
 
 /// Picker value format callback.
 typedef PickerValueFormat<T> = String Function(T value);
@@ -34,6 +38,7 @@ class Picker {
   final VoidCallback? onCancel;
   final PickerSelectedCallback? onSelect;
   final PickerConfirmCallback? onConfirm;
+  final PickerConfirmBeforeCallback? onConfirmBefore;
 
   /// When the previous level selection changes, scroll the child to the first item.
   final changeToFirst;
@@ -131,6 +136,7 @@ class Picker {
       this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
       this.onCancel,
       this.onSelect,
+      this.onConfirmBefore,
       this.onConfirm}) {
     this.selecteds = selecteds == null ? <int>[] : selecteds;
   }
@@ -208,7 +214,10 @@ class Picker {
             if (_confirmText != null && _confirmText != "") {
               actions.add(TextButton(
                   style: _getButtonStyle(ButtonTheme.of(context)),
-                  onPressed: () {
+                  onPressed: () async {
+                    if (onConfirmBefore != null && !(await onConfirmBefore!(this, selecteds))) {
+                      return; // Cancel;
+                    }
                     Navigator.pop<List<int>>(context, selecteds);
                     onConfirm!(this, selecteds);
                   },
@@ -245,7 +254,10 @@ class Picker {
   }
 
   /// 确定
-  void doConfirm(BuildContext context) {
+  void doConfirm(BuildContext context) async {
+    if (onConfirmBefore != null && !(await onConfirmBefore!(this, selecteds))) {
+      return; // Cancel;
+    }
     Navigator.of(context).pop<List<int>>(selecteds);
     if (onConfirm != null) onConfirm!(this, selecteds);
     _widget = null;
@@ -1200,6 +1212,14 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     var day = _columnType.indexWhere((element) => element == 2);
     _needUpdatePrev =
         day < month || day < _columnType.indexWhere((element) => element == 0);
+    if (!_needUpdatePrev) {
+      // check am/pm before hour-ap
+      var ap = _columnType.indexWhere((element) => element == 6);
+      if (ap >  _columnType.indexWhere((element) => element == 7)) {
+        _apBeforeHourAp = true;
+        _needUpdatePrev = true;
+      }
+    }
     if (value == null) value = DateTime.now();
   }
 
@@ -1209,6 +1229,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   int _colDay = -1;
   int _yearBegin = 0;
   bool _needUpdatePrev = false;
+  bool _apBeforeHourAp = false;
 
   /// Currently selected value
   DateTime? value;
@@ -1341,10 +1362,14 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
 
   @override
   bool needUpdatePrev(int curIndex) {
-    if (_needUpdatePrev && value?.month == 2) {
-      // Only February needs to be dealt with
-      var _curType = getColumnType(curIndex);
-      return _curType == 1 || _curType == 0;
+    if (_needUpdatePrev) {
+      if (value?.month == 2) {
+        // Only February needs to be dealt with
+        var _curType = getColumnType(curIndex);
+        return _curType == 1 || _curType == 0;
+      } else if (_apBeforeHourAp) {
+        return getColumnType(curIndex) == 6;
+      }
     }
     return false;
   }
@@ -1457,8 +1482,13 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         case 3:
           var h = value!.hour;
           if ((minHour != null && minHour! >= 0) ||
-              (maxHour != null && maxHour! <= 23))
-            h = (maxHour ?? 23) - (minHour ?? 0) + 1;
+              (maxHour != null && maxHour! <= 23)) {
+            if (minHour != null) {
+              h = h > minHour! ? h - minHour! : 0;
+            } else {
+              h = (maxHour ?? 23) - (minHour ?? 0) + 1;
+            }
+          }
           picker!.selecteds[i] = h;
           break;
         case 4:
