@@ -1,8 +1,8 @@
-## 2.0.2
+## 2.0.2 - 2021.06.25
 
-# Fixed bug: #142, #98
-# Add demo DurationPicker
-# Add onConfirmBefore callback event;
+* Fixed bug: #142, #98
+* Add demo DurationPicker
+* Add onConfirmBefore callback event;
 
 ## 2.0.1
 * Fixed bug.
