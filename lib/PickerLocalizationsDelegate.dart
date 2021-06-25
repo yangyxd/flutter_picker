@@ -12,11 +12,13 @@ class PickerLocalizationsDelegate
       const PickerLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => PickerLocalizations.languages.contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      PickerLocalizations.languages.contains(locale.languageCode);
 
   @override
   Future<PickerLocalizations> load(Locale locale) {
-    return SynchronousFuture<PickerLocalizations>(new PickerLocalizations(locale));
+    return SynchronousFuture<PickerLocalizations>(
+        new PickerLocalizations(locale));
   }
 
   @override
