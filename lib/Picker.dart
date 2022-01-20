@@ -169,10 +169,13 @@ class Picker {
 
   /// Display modal picker
   Future<T?> showModal<T>(BuildContext context,
-      [ThemeData? themeData, bool isScrollControlled = false]) async {
+      [ThemeData? themeData,
+      bool isScrollControlled = false,
+      bool useRootNavigator = false]) async {
     return await showModalBottomSheet<T>(
         context: context, //state.context,
         isScrollControlled: isScrollControlled,
+        useRootNavigator: useRootNavigator,
         builder: (BuildContext context) {
           return makePicker(themeData, true);
         });
