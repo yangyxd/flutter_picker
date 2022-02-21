@@ -22,6 +22,10 @@ typedef PickerConfirmBeforeCallback = Future<bool> Function(
 /// Picker value format callback.
 typedef PickerValueFormat<T> = String Function(T value);
 
+/// Picker widget builder
+typedef PickerWidgetBuilder = Widget Function(
+    BuildContext context, Widget pickerWidget);
+
 /// Picker
 class Picker {
   static const double DefaultTextSize = 20.0;
@@ -161,29 +165,42 @@ class Picker {
   }
 
   /// show picker
-  void show(ScaffoldState state, [ThemeData? themeData]) {
+  void show(
+    ScaffoldState state, {
+    ThemeData? themeData,
+    Color? backgroundColor,
+    PickerWidgetBuilder? builder,
+  }) {
     state.showBottomSheet((BuildContext context) {
-      return makePicker(themeData);
-    });
+      final picker = makePicker(themeData);
+      return builder == null ? picker : builder(context, picker);
+    }, backgroundColor: backgroundColor);
   }
 
   /// Display modal picker
   Future<T?> showModal<T>(BuildContext context,
-      [ThemeData? themeData,
+      {ThemeData? themeData,
       bool isScrollControlled = false,
-      bool useRootNavigator = false]) async {
+      bool useRootNavigator = false,
+      Color? backgroundColor,
+      PickerWidgetBuilder? builder}) async {
     return await showModalBottomSheet<T>(
         context: context, //state.context,
         isScrollControlled: isScrollControlled,
         useRootNavigator: useRootNavigator,
+        backgroundColor: backgroundColor,
         builder: (BuildContext context) {
-          return makePicker(themeData, true);
+          final picker = makePicker(themeData, true);
+          return builder == null ? picker : builder(context, picker);
         });
   }
 
   /// show dialog picker
   Future<List<int>?> showDialog(BuildContext context,
-      {bool barrierDismissible = true, Key? key}) {
+      {bool barrierDismissible = true,
+      Color? backgroundColor,
+      PickerWidgetBuilder? builder,
+      Key? key}) {
     return Dialog.showDialog<List<int>>(
         context: context,
         barrierDismissible: barrierDismissible,
@@ -234,12 +251,13 @@ class Picker {
           } else {
             actions.add(confirm!);
           }
-
           return AlertDialog(
             key: key ?? Key('picker-dialog'),
             title: title,
+            backgroundColor: backgroundColor,
             actions: actions,
-            content: makePicker(),
+            content:
+                builder == null ? makePicker() : builder(context, makePicker()),
           );
         });
   }
@@ -375,7 +393,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     } else
       _wait = false;
 
-    var _body = <Widget>[];
+    final _body = <Widget>[];
     if (!picker.hideHeader) {
       if (picker.builderHeader != null) {
         _body.add(picker.headerDecoration == null
@@ -1231,7 +1249,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         _needUpdatePrev = true;
       }
     }
-    if (value == null) value = DateTime.now();
+    if (value == null) {
+      value = DateTime.now();
+      _verificationMinMaxValue();
+    }
   }
 
   int _col = 0;
@@ -1504,9 +1525,19 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           picker!.selecteds[i] = h;
           break;
         case 4:
-          picker!.selecteds[i] = minuteInterval == null || minuteInterval! < 2
-              ? value!.minute
-              : value!.minute ~/ minuteInterval!;
+          if (minuteInterval == null || minuteInterval! < 2) {
+            picker!.selecteds[i] = value!.minute;
+          } else {
+            picker!.selecteds[i] = value!.minute ~/ minuteInterval!;
+            final m = picker!.selecteds[i] * minuteInterval!;
+            if (m != value!.minute) {
+              // 需要更新 value
+              var s = value!.second;
+              if (type != 2 && type != 6) s = 0;
+              value = DateTime(
+                  value!.year, value!.month, value!.day, value!.hour, m, s);
+            }
+          }
           break;
         case 5:
           picker!.selecteds[i] = value!.second;
@@ -1596,18 +1627,25 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     }
     value = DateTime(year, month, day, h, m, s);
 
-    if (minValue != null &&
-        (value!.millisecondsSinceEpoch < minValue!.millisecondsSinceEpoch)) {
-      value = minValue;
-      notifyDataChanged();
-    } else if (maxValue != null &&
-        value!.millisecondsSinceEpoch > maxValue!.millisecondsSinceEpoch) {
-      value = maxValue;
+    if (_verificationMinMaxValue()) {
       notifyDataChanged();
     } else if (_isChangeDay && _colDay >= 0) {
       doShow();
       picker!.updateColumn(_colDay);
     }
+  }
+
+  bool _verificationMinMaxValue() {
+    if (minValue != null &&
+        (value!.millisecondsSinceEpoch < minValue!.millisecondsSinceEpoch)) {
+      value = minValue;
+      return true;
+    } else if (maxValue != null &&
+        value!.millisecondsSinceEpoch > maxValue!.millisecondsSinceEpoch) {
+      value = maxValue;
+      return true;
+    }
+    return false;
   }
 
   int _getAPColIndex() {

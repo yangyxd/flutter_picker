@@ -1,3 +1,8 @@
+## 2.0.3 - 2022.02.212
+
+* Fixed bug: #161, #165 ...
+* Add `onBuilder`, `backgroundColor` parameter to `show`, `showDialog`, `showModal`
+
 ## 2.0.2 - 2021.06.25
 
 * Fixed bug: #142, #98
