@@ -169,10 +169,13 @@ class Picker {
 
   /// Display modal picker
   Future<T?> showModal<T>(BuildContext context,
-      [ThemeData? themeData, bool isScrollControlled = false]) async {
+      [ThemeData? themeData,
+      bool isScrollControlled = false,
+      bool useRootNavigator = false]) async {
     return await showModalBottomSheet<T>(
         context: context, //state.context,
         isScrollControlled: isScrollControlled,
+        useRootNavigator: useRootNavigator,
         builder: (BuildContext context) {
           return makePicker(themeData, true);
         });
@@ -215,7 +218,8 @@ class Picker {
               actions.add(TextButton(
                   style: _getButtonStyle(ButtonTheme.of(context)),
                   onPressed: () async {
-                    if (onConfirmBefore != null && !(await onConfirmBefore!(this, selecteds))) {
+                    if (onConfirmBefore != null &&
+                        !(await onConfirmBefore!(this, selecteds))) {
                       return; // Cancel;
                     }
                     Navigator.pop<List<int>>(context, selecteds);
@@ -451,7 +455,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       items.add(DefaultTextStyle(
           style: picker.cancelTextStyle ??
               theme!.textTheme.button!.copyWith(
-                  color: theme!.colorScheme.secondary, fontSize: Picker.DefaultTextSize),
+                  color: theme!.colorScheme.secondary,
+                  fontSize: Picker.DefaultTextSize),
           child: picker.cancel!));
     } else {
       String? _cancelText =
@@ -479,7 +484,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       items.add(DefaultTextStyle(
           style: picker.confirmTextStyle ??
               theme!.textTheme.button!.copyWith(
-                  color: theme!.colorScheme.secondary, fontSize: Picker.DefaultTextSize),
+                  color: theme!.colorScheme.secondary,
+                  fontSize: Picker.DefaultTextSize),
           child: picker.confirm!));
     } else {
       String? _confirmText =
@@ -1132,7 +1138,12 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   final int? minuteInterval;
 
   /// Year, month, day suffix
-  final String? yearSuffix, monthSuffix, daySuffix, hourSuffix, minuteSuffix, secondSuffix;
+  final String? yearSuffix,
+      monthSuffix,
+      daySuffix,
+      hourSuffix,
+      minuteSuffix,
+      secondSuffix;
 
   /// use two-digit year, 2019, displayed as 19
   final bool twoDigitYear;
@@ -1432,7 +1443,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         if (minuteInterval == null || minuteInterval! < 2)
           _text = "${intToStr(index)}${_checkStr(minuteSuffix)}";
         else
-          _text = "${intToStr(index * minuteInterval!)}${_checkStr(minuteSuffix)}";
+          _text =
+              "${intToStr(index * minuteInterval!)}${_checkStr(minuteSuffix)}";
         break;
       case 6:
         List? _ampm = strAMPM ?? PickerLocalizations.of(context).ampm;
