@@ -147,12 +147,12 @@ class Picker {
 
   /// 生成picker控件
   /// Build picker control
-  Widget makePicker([ThemeData? themeData, bool isModal = false]) {
+  Widget makePicker([ThemeData? themeData, bool isModal = false, Key? key]) {
     _maxLevel = adapter.maxLevel;
     adapter.picker = this;
     adapter.initSelects();
     _widget = PickerWidget(
-      key: ValueKey(this),
+      key: key ?? ValueKey(this),
       child:
           _PickerWidget(picker: this, themeData: themeData, isModal: isModal),
       data: this,
@@ -438,7 +438,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
             textScaleFactor: MediaQuery.of(context).textScaleFactor,
             style: style ??
                 theme!.textTheme.button!.copyWith(
-                    color: theme!.accentColor,
+                    color: theme!.colorScheme.secondary,
                     fontSize: Picker.DefaultTextSize)));
   }
 
@@ -451,7 +451,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       items.add(DefaultTextStyle(
           style: picker.cancelTextStyle ??
               theme!.textTheme.button!.copyWith(
-                  color: theme!.accentColor, fontSize: Picker.DefaultTextSize),
+                  color: theme!.colorScheme.secondary, fontSize: Picker.DefaultTextSize),
           child: picker.cancel!));
     } else {
       String? _cancelText =
@@ -479,7 +479,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       items.add(DefaultTextStyle(
           style: picker.confirmTextStyle ??
               theme!.textTheme.button!.copyWith(
-                  color: theme!.accentColor, fontSize: Picker.DefaultTextSize),
+                  color: theme!.colorScheme.secondary, fontSize: Picker.DefaultTextSize),
           child: picker.confirm!));
     } else {
       String? _confirmText =
@@ -1215,7 +1215,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     if (!_needUpdatePrev) {
       // check am/pm before hour-ap
       var ap = _columnType.indexWhere((element) => element == 6);
-      if (ap >  _columnType.indexWhere((element) => element == 7)) {
+      if (ap > _columnType.indexWhere((element) => element == 7)) {
         _apBeforeHourAp = true;
         _needUpdatePrev = true;
       }

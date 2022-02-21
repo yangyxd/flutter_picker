@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -15,6 +16,14 @@ class MyApp extends StatefulWidget {
 
 final String _fontFamily = Platform.isWindows ? "Roboto" : "";
 
+const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
+  PointerDeviceKind.touch,
+  PointerDeviceKind.mouse,
+  PointerDeviceKind.stylus,
+  PointerDeviceKind.invertedStylus,
+  PointerDeviceKind.unknown
+};
+
 class _MyAppState extends State<MyApp> {
 
   @override
@@ -25,7 +34,10 @@ class _MyAppState extends State<MyApp> {
           fontFamily: _fontFamily,
           primaryTextTheme: TextTheme().apply(fontFamily: _fontFamily),
         ),
-
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+            scrollbars: true,
+            dragDevices: _kTouchLikeDeviceTypes
+        ),
         localizationsDelegates: [
           PickerLocalizationsDelegate.delegate, // 如果要使用本地化，请添加此行，则可以显示中文按钮
           GlobalMaterialLocalizations.delegate,
