@@ -9,6 +9,10 @@ Flutter plugin picker. Include NumberPicker, DateTimePicker, ArrayPicker, and de
 > Supported  Platforms
 > * Android
 > * IOS
+> * Windows
+> * MacOS
+> * Linux
+> * Web
 
 ![image](https://github.com/yangyxd/flutter_picker/blob/master/raw/views.gif)
 

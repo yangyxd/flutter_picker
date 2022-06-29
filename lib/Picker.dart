@@ -5,7 +5,7 @@ import 'package:flutter/material.dart' as Dialog;
 import 'dart:async';
 import 'PickerLocalizations.dart';
 
-const bool __printDebug = false;
+const bool __printDebug = true;
 
 /// Picker selected callback.
 typedef PickerSelectedCallback = void Function(
@@ -26,9 +26,13 @@ typedef PickerValueFormat<T> = String Function(T value);
 typedef PickerWidgetBuilder = Widget Function(
     BuildContext context, Widget pickerWidget);
 
+/// Picker build item, If 'null' is returned, the default build is used
+typedef PickerItemBuilder = Widget? Function(BuildContext context, String? text,
+    Widget? child, bool selected, int col, int index);
+
 /// Picker
 class Picker {
-  static const double DefaultTextSize = 20.0;
+  static const double DefaultTextSize = 18.0;
 
   /// Index of currently selected items
   late List<int> selecteds;
@@ -82,6 +86,9 @@ class Picker {
 
   /// Generate a custom header， [hideHeader] = true
   final WidgetBuilder? builderHeader;
+
+  /// Generate a custom item widget, If 'null' is returned, the default builder is used
+  final PickerItemBuilder? onBuilderItem;
 
   /// List item loop
   final bool looping;
@@ -138,6 +145,7 @@ class Picker {
       this.diameterRatio = 1.1,
       this.squeeze = 1.45,
       this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
+      this.onBuilderItem,
       this.onCancel,
       this.onSelect,
       this.onConfirmBefore,
@@ -150,6 +158,7 @@ class Picker {
   int _maxLevel = 1;
 
   /// 生成picker控件
+  ///
   /// Build picker control
   Widget makePicker([ThemeData? themeData, bool isModal = false, Key? key]) {
     _maxLevel = adapter.maxLevel;
@@ -206,58 +215,40 @@ class Picker {
         barrierDismissible: barrierDismissible,
         builder: (BuildContext context) {
           final actions = <Widget>[];
-
-          if (cancel == null) {
-            String? _cancelText =
-                cancelText ?? PickerLocalizations.of(context).cancelText;
-            if (_cancelText != null && _cancelText != "") {
-              actions.add(TextButton(
-                  style: _getButtonStyle(ButtonTheme.of(context)),
-                  onPressed: () {
-                    Navigator.pop<List<int>>(context, null);
-                    if (onCancel != null) {
-                      onCancel!();
-                    }
-                  },
-                  child: cancelTextStyle == null
-                      ? Text(_cancelText)
-                      : DefaultTextStyle(
-                          child: Text(_cancelText), style: cancelTextStyle!)));
+          final theme = Theme.of(context);
+          final _cancel = PickerWidgetState._buildButton(
+              context, cancelText, cancel, cancelTextStyle, true, theme, () {
+            Navigator.pop<List<int>>(context, null);
+            if (onCancel != null) {
+              onCancel!();
             }
-          } else {
-            actions.add(cancel!);
+          });
+          if (_cancel != null) {
+            actions.add(_cancel);
           }
-
-          if (confirm == null) {
-            String? _confirmText =
-                confirmText ?? PickerLocalizations.of(context).confirmText;
-            if (_confirmText != null && _confirmText != "") {
-              actions.add(TextButton(
-                  style: _getButtonStyle(ButtonTheme.of(context)),
-                  onPressed: () async {
-                    if (onConfirmBefore != null &&
-                        !(await onConfirmBefore!(this, selecteds))) {
-                      return; // Cancel;
-                    }
-                    Navigator.pop<List<int>>(context, selecteds);
-                    onConfirm!(this, selecteds);
-                  },
-                  child: confirmTextStyle == null
-                      ? Text(_confirmText)
-                      : DefaultTextStyle(
-                          child: Text(_confirmText),
-                          style: confirmTextStyle!)));
+          final _confirm = PickerWidgetState._buildButton(
+              context, confirmText, confirm, confirmTextStyle, false, theme,
+              () async {
+            if (onConfirmBefore != null &&
+                !(await onConfirmBefore!(this, selecteds))) {
+              return; // Cancel;
             }
-          } else {
-            actions.add(confirm!);
+            Navigator.pop<List<int>>(context, selecteds);
+            if (onConfirm != null) {
+              onConfirm!(this, selecteds);
+            }
+          });
+          if (_confirm != null) {
+            actions.add(_confirm);
           }
           return AlertDialog(
             key: key ?? Key('picker-dialog'),
             title: title,
             backgroundColor: backgroundColor,
             actions: actions,
-            content:
-                builder == null ? makePicker() : builder(context, makePicker()),
+            content: builder == null
+                ? makePicker(theme)
+                : builder(context, makePicker(theme)),
           );
         });
   }
@@ -292,13 +283,21 @@ class Picker {
       _state?.update();
       return;
     }
-    adapter.setColumn(index - 1);
-    if (_state?._keys[index] != null) _state?._keys[index]!(() => null);
+    if (_state?._keys[index] != null) {
+      adapter.setColumn(index - 1);
+      _state?._keys[index]!(() => null);
+    }
   }
 
-  static ButtonStyle _getButtonStyle(ButtonThemeData? theme) => ButtonStyle(
-      minimumSize: MaterialStateProperty.all(Size(theme?.minWidth ?? 0.0, 42)),
-      padding: MaterialStateProperty.all(theme?.padding));
+  static ButtonStyle _getButtonStyle(ButtonThemeData? theme,
+          [isCancelButton = false]) =>
+      TextButton.styleFrom(
+          minimumSize: Size(theme?.minWidth ?? 0.0, 42),
+          textStyle: TextStyle(
+            fontSize: Picker.DefaultTextSize,
+            color: isCancelButton ? null : theme?.colorScheme?.secondary,
+          ),
+          padding: theme?.padding);
 }
 
 /// 分隔符
@@ -419,6 +418,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
         ));
       }
     }
+
     _body.add(_wait
         ? Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -448,76 +448,70 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
   List<Widget>? _headerItems;
 
-  Widget _buildHeaderButton(BuildContext context,
-      {required String text,
-      required VoidCallback onPressed,
-      TextStyle? style}) {
-    return TextButton(
-        style: Picker._getButtonStyle(ButtonTheme.of(context)),
-        onPressed: onPressed,
-        child: Text(text,
-            overflow: TextOverflow.ellipsis,
-            textScaleFactor: MediaQuery.of(context).textScaleFactor,
-            style: style ??
-                theme!.textTheme.button!.copyWith(
-                    color: theme!.colorScheme.secondary,
-                    fontSize: Picker.DefaultTextSize)));
-  }
-
   List<Widget> _buildHeaderViews(BuildContext context) {
-    if (_headerItems != null) return _headerItems!;
+    if (_headerItems != null) {
+      return _headerItems!;
+    }
     if (theme == null) theme = Theme.of(context);
     List<Widget> items = [];
 
-    if (picker.cancel != null) {
-      items.add(DefaultTextStyle(
-          style: picker.cancelTextStyle ??
-              theme!.textTheme.button!.copyWith(
-                  color: theme!.colorScheme.secondary,
-                  fontSize: Picker.DefaultTextSize),
-          child: picker.cancel!));
-    } else {
-      String? _cancelText =
-          picker.cancelText ?? PickerLocalizations.of(context).cancelText;
-      if (_cancelText != null || _cancelText != "") {
-        items.add(_buildHeaderButton(context,
-            text: _cancelText!, style: picker.cancelTextStyle, onPressed: () {
-          picker.doCancel(context);
-        }));
-      }
+    final _cancel = _buildButton(context, picker.cancelText, picker.cancel,
+        picker.cancelTextStyle, true, theme, () => picker.doCancel(context));
+    if (_cancel != null) {
+      items.add(_cancel);
     }
 
     items.add(Expanded(
-        child: Center(
       child: picker.title == null
-          ? picker.title
+          ? SizedBox()
           : DefaultTextStyle(
-              style: theme!.textTheme.headline6!.copyWith(
-                fontSize: Picker.DefaultTextSize,
-              ),
+              style: theme!.textTheme.headline6?.copyWith(
+                    fontSize: Picker.DefaultTextSize,
+                  ) ??
+                  TextStyle(fontSize: Picker.DefaultTextSize),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
               child: picker.title!),
-    )));
+    ));
 
-    if (picker.confirm != null) {
-      items.add(DefaultTextStyle(
-          style: picker.confirmTextStyle ??
-              theme!.textTheme.button!.copyWith(
-                  color: theme!.colorScheme.secondary,
-                  fontSize: Picker.DefaultTextSize),
-          child: picker.confirm!));
-    } else {
-      String? _confirmText =
-          picker.confirmText ?? PickerLocalizations.of(context).confirmText;
-      if (_confirmText != null || _confirmText != "") {
-        items.add(_buildHeaderButton(context,
-            text: _confirmText!, style: picker.confirmTextStyle, onPressed: () {
-          picker.doConfirm(context);
-        }));
-      }
+    final _confirm = _buildButton(context, picker.confirmText, picker.confirm,
+        picker.confirmTextStyle, false, theme, () => picker.doConfirm(context));
+    if (_confirm != null) {
+      items.add(_confirm);
     }
 
     _headerItems = items;
     return items;
+  }
+
+  static Widget? _buildButton(
+      BuildContext context,
+      String? text,
+      Widget? widget,
+      TextStyle? textStyle,
+      bool isCancel,
+      ThemeData? theme,
+      VoidCallback? onPressed) {
+    if (widget == null) {
+      String? _txt = text ??
+          (isCancel
+              ? PickerLocalizations.of(context).cancelText
+              : PickerLocalizations.of(context).confirmText);
+      if (_txt == null || _txt.isEmpty) {
+        return null;
+      }
+      return TextButton(
+          style: Picker._getButtonStyle(ButtonTheme.of(context), isCancel),
+          onPressed: onPressed,
+          child: Text(_txt,
+              overflow: TextOverflow.ellipsis,
+              textScaleFactor: MediaQuery.of(context).textScaleFactor,
+              style: textStyle));
+    } else {
+      return textStyle == null
+          ? widget
+          : DefaultTextStyle(style: textStyle, child: widget);
+    }
   }
 
   bool _changing = false;
@@ -527,9 +521,9 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   List<Widget> _buildViews() {
     if (__printDebug) print("_buildViews");
     if (theme == null) theme = Theme.of(context);
+    for (int j = 0; j < _keys.length; j++) _keys[j] = null;
 
     List<Widget> items = [];
-
     PickerAdapter? adapter = picker.adapter;
     adapter.setColumn(-1);
 
@@ -553,61 +547,15 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                     builder: (context, state) {
                       _keys[i] = state;
                       adapter.setColumn(i - 1);
+                      if (__printDebug) print("builder. col: $i");
 
                       // 上一次是空列表
                       final _lastIsEmpty = scrollController[i].hasClients &&
                           !scrollController[i].position.hasContentDimensions;
 
                       final _length = adapter.length;
-                      var _view = CupertinoPicker.builder(
-                        key: _lastIsEmpty ? ValueKey(_length) : null,
-                        backgroundColor: picker.backgroundColor,
-                        scrollController: scrollController[i],
-                        itemExtent: picker.itemExtent,
-                        // looping: picker.looping,
-                        magnification: picker.magnification,
-                        diameterRatio: picker.diameterRatio,
-                        squeeze: picker.squeeze,
-                        selectionOverlay: picker.selectionOverlay,
-                        onSelectedItemChanged: (int _index) {
-                          if (__printDebug) print("onSelectedItemChanged");
-                          if (_length <= 0) return;
-                          var index = _index % _length;
-                          picker.selecteds[i] = index;
-                          updateScrollController(i);
-                          adapter.doSelect(i, index);
-                          if (picker.changeToFirst) {
-                            for (int j = i + 1;
-                                j < picker.selecteds.length;
-                                j++) {
-                              picker.selecteds[j] = 0;
-                              scrollController[j].jumpTo(0.0);
-                            }
-                          }
-                          if (picker.onSelect != null)
-                            picker.onSelect!(picker, i, picker.selecteds);
-
-                          if (adapter.needUpdatePrev(i))
-                            setState(() {});
-                          else {
-                            if (_keys[i] != null) _keys[i]!(() => null);
-                            if (adapter.isLinkage) {
-                              for (int j = i + 1;
-                                  j < picker.selecteds.length;
-                                  j++) {
-                                if (j == i) continue;
-                                adapter.setColumn(j - 1);
-                                if (_keys[j] != null) _keys[j]!(() => null);
-                              }
-                            }
-                          }
-                        },
-                        itemBuilder: (context, index) {
-                          adapter.setColumn(i - 1);
-                          return adapter.buildItem(context, index % _length);
-                        },
-                        childCount: picker.looping ? null : _length,
-                      );
+                      final _view = _buildCupertinoPicker(context, i, _length,
+                          adapter, _lastIsEmpty ? ValueKey(_length) : null);
 
                       if (_lastIsEmpty ||
                           (!picker.changeToFirst &&
@@ -624,7 +572,9 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                           } else {
                             scrollController[i] = FixedExtentScrollController(
                                 initialItem: _index);
-                            state(() => null);
+                            if (_keys[i] != null) {
+                              _keys[i]!(() => null);
+                            }
                           }
                         });
                       }
@@ -642,7 +592,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       for (int i = 0; i < picker.delimiter!.length; i++) {
         var o = picker.delimiter![i];
         if (o.child == null) continue;
-        var item = Container(child: o.child, height: picker.height);
+        var item = SizedBox(child: o.child, height: picker.height);
         if (o.column < 0)
           items.insert(0, item);
         else if (o.column >= items.length)
@@ -657,14 +607,71 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     return items;
   }
 
-  void updateScrollController(int i) {
-    if (_changing || !(picker.adapter.isLinkage)) return;
+  Widget _buildCupertinoPicker(BuildContext context,
+      int i, int _length, PickerAdapter adapter, Key? key) {
+    int ref = 0;
+    return CupertinoPicker.builder(
+      key: key,
+      backgroundColor: picker.backgroundColor,
+      scrollController: scrollController[i],
+      itemExtent: picker.itemExtent,
+      // looping: picker.looping,
+      magnification: picker.magnification,
+      diameterRatio: picker.diameterRatio,
+      squeeze: picker.squeeze,
+      selectionOverlay: picker.selectionOverlay,
+      childCount: picker.looping ? null : _length,
+      itemBuilder: (context, index) {
+        adapter.setColumn(i - 1);
+        return adapter.buildItem(context, index % _length);
+      },
+      onSelectedItemChanged: (int _index) {
+        if (_length <= 0) return;
+        var index = _index % _length;
+        if (__printDebug) print("onSelectedItemChanged. col: $i, row: $index");
+        picker.selecteds[i] = index;
+        updateScrollController(i);
+        adapter.doSelect(i, index);
+        if (picker.changeToFirst) {
+          for (int j = i + 1; j < picker.selecteds.length; j++) {
+            picker.selecteds[j] = 0;
+            scrollController[j].jumpTo(0.0);
+          }
+        }
+        if (picker.onSelect != null)
+          picker.onSelect!(picker, i, picker.selecteds);
+
+        if (adapter.needUpdatePrev(i)) {
+          for (int j = 0; j < picker.selecteds.length; j++) {
+            if (j != i && _keys[j] != null) {
+              adapter.setColumn(j - 1);
+              _keys[j]!(() => null);
+            }
+          }
+          // setState(() {});
+        } else {
+          if (_keys[i] != null) _keys[i]!(() => null);
+          if (adapter.isLinkage) {
+            for (int j = i + 1; j < picker.selecteds.length; j++) {
+              if (j == i) continue;
+              adapter.setColumn(j - 1);
+              _keys[j]?.call(() => null);
+            }
+          }
+        }
+      },
+    );
+  }
+
+  void updateScrollController(int col) {
+    if (_changing || picker.adapter.isLinkage == false) return;
     _changing = true;
     for (int j = 0; j < picker.selecteds.length; j++) {
-      if (j != i) {
+      if (j != col) {
         if (scrollController[j].hasClients &&
-            scrollController[j].position.hasContentDimensions)
+            scrollController[j].position.hasContentDimensions) {
           scrollController[j].position.notifyListeners();
+        }
       }
     }
     _changing = false;
@@ -673,7 +680,6 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   @override
   void debugFillProperties(properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<bool>('_changing', _changing));
     properties.add(DiagnosticsProperty<bool>('_changing', _changing));
   }
 }
@@ -924,6 +930,11 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
   Widget buildItem(BuildContext context, int index) {
     final PickerItem item = _datas![index];
     final isSel = index == picker!.selecteds[_col];
+    if (picker!.onBuilderItem != null) {
+      final _v = picker!.onBuilderItem!(
+          context, item.value.toString(), item.text, isSel, _col, index);
+      if (_v != null) return _v;
+    }
     if (item.text != null) {
       return isSel && picker!.selectedTextStyle != null
           ? DefaultTextStyle(
@@ -1085,12 +1096,16 @@ class NumberPickerAdapter extends PickerAdapter<int> {
 
   @override
   Widget buildItem(BuildContext context, int index) {
+    final txt = cur!.getValueText(index);
+    final isSel = index == picker!.selecteds[_col];
+    if (picker!.onBuilderItem != null) {
+      final _v = picker!.onBuilderItem!(context, txt, null, isSel, _col, index);
+      if (_v != null) return _v;
+    }
     if (cur!.postfix == null && cur!.suffix == null)
-      return makeText(
-          null, cur!.getValueText(index), index == picker!.selecteds[_col]);
+      return makeText(null, txt, isSel);
     else
-      return makeTextEx(null, cur!.getValueText(index), cur!.postfix,
-          cur!.suffix, index == picker!.selecteds[_col]);
+      return makeTextEx(null, txt, cur!.postfix, cur!.suffix, isSel);
   }
 
   @override
@@ -1131,7 +1146,7 @@ class PickerDateTimeType {
 }
 
 class DateTimePickerAdapter extends PickerAdapter<DateTime> {
-  /// display type, ref: columnType
+  /// display type, ref: [columnType]
   final int type;
 
   /// Whether to display the month in numerical form.If true, months is not used.
@@ -1251,10 +1266,12 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     }
     if (value == null) {
       value = DateTime.now();
-      _verificationMinMaxValue();
     }
+    _existSec = existSec();
+    _verificationMinMaxValue();
   }
 
+  bool _existSec = false;
   int _col = 0;
   int _colAP = -1;
   int _colHour = -1;
@@ -1321,6 +1338,13 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     List<int> items = columnType[type];
     if (index >= items.length) return -1;
     return items[index];
+  }
+
+  // 判断是否存在秒
+  bool existSec() {
+    final _columns =
+        customColumnType == null ? columnType[type] : customColumnType!;
+    return _columns.indexOf(5) >= 0;
   }
 
   @override
@@ -1478,7 +1502,12 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         break;
     }
 
-    return makeText(null, _text, picker!.selecteds[_col] == index);
+    final isSel = picker!.selecteds[_col] == index;
+    if (picker!.onBuilderItem != null) {
+      var _v = picker!.onBuilderItem!(context, _text, null, isSel, _col, index);
+      if (_v != null) return _v;
+    }
+    return makeText(null, _text, isSel);
   }
 
   @override
@@ -1564,8 +1593,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     day = value!.day;
     h = value!.hour;
     m = value!.minute;
-    s = value!.second;
-    if (type != 2 && type != 6) s = 0;
+    s = _existSec ? value!.second : 0;
 
     int colType = getColumnType(column);
     switch (colType) {
@@ -1636,13 +1664,21 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   }
 
   bool _verificationMinMaxValue() {
-    if (minValue != null &&
-        (value!.millisecondsSinceEpoch < minValue!.millisecondsSinceEpoch)) {
-      value = minValue;
+    DateTime? _minV = minValue;
+    DateTime? _maxV = maxValue;
+    if (_minV == null && yearBegin != null) {
+      _minV = DateTime(yearBegin!, 1, 1, minHour ?? 0);
+    }
+    if (_maxV == null && yearEnd != null) {
+      _maxV = DateTime(yearEnd!, 12, 31, maxHour ?? 23, 59, 59);
+    }
+    if (_minV != null &&
+        (value!.millisecondsSinceEpoch < _minV.millisecondsSinceEpoch)) {
+      value = _minV;
       return true;
-    } else if (maxValue != null &&
-        value!.millisecondsSinceEpoch > maxValue!.millisecondsSinceEpoch) {
-      value = maxValue;
+    } else if (_maxV != null &&
+        value!.millisecondsSinceEpoch > _maxV.millisecondsSinceEpoch) {
+      value = _maxV;
       return true;
     }
     return false;

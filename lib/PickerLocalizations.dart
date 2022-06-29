@@ -32,6 +32,43 @@ class PickerLocalizations extends PickerLocalizationsBase {
         _static;
   }
 
+  /// 注册自定义语言
+  ///
+  /// Register custom language
+  static registerCustomLanguage(String name,
+      {String? cancelText,
+      String? confirmText,
+      List<String>? ampm,
+      List<String>? months,
+      List<String>? monthsLong}) {
+    if (name.isEmpty) return;
+    if (ampm != null && ampm.length != 2) {
+      throw Exception('ampm array length must be 2');
+    }
+    if (months != null && months.length != 12) {
+      throw Exception('months array length must be 12');
+    }
+    if (monthsLong != null && monthsLong.length != 12) {
+      throw Exception('monthsLong array length must be 12');
+    }
+    if (!languages.contains(name)) {
+      languages.add(name);
+    }
+    final _defaultValue = localizedValues['en']!;
+    final data = {
+      'cancelText': cancelText ?? _defaultValue['cancelText'] as String,
+      'confirmText': cancelText ?? _defaultValue['confirmText'] as String,
+      'ampm': ampm ?? _defaultValue['ampm'] as List,
+    };
+    if (months != null) {
+      data['months'] = months;
+    }
+    if (monthsLong != null) {
+      data['monthsLong'] = monthsLong;
+    }
+    localizedValues[name] = data;
+  }
+
   /// Language Support
   static const List<String> languages = [
     'en',

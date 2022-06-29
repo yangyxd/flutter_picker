@@ -1,3 +1,9 @@
+## 2.0.4 - 2022.06.28
+
+* Add `PickerLocalizations.registerCustomLanguage` function
+* Add `onBuilderItem` params. Allow custom item to be generated.
+* Fixed bug: #158, #168, #169, #177
+
 ## 2.0.3 - 2022.02.212
 
 * Fixed bug: #161, #165 ...

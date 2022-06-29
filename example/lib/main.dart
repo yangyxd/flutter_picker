@@ -160,6 +160,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 showPickerCustomizeUI(context);
               },
             ),
+            ListTile(
+              title: Text('15. Use onBuilderItem'),
+              onTap: () {
+                showPickerCustomBuilder(context);
+              },
+            ),
           ],
         ),
       ),
@@ -170,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  showPicker(BuildContext context) {
+  showPicker(BuildContext context) async {
     Picker picker = Picker(
         adapter: PickerDataAdapter<String>(
             pickerdata: JsonDecoder().convert(PickerData)),
@@ -554,6 +560,27 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  /// 使用 onBuilderItem 方法
+  showPickerCustomBuilder(BuildContext context) {
+    Picker(
+        hideHeader: true,
+        adapter: DateTimePickerAdapter(
+          customColumnType: [2, 1, 0, 3, 4],
+        ),
+        title: Text("Select Data"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
+        onBuilderItem: (context, text, child, selected, col, index) {
+          if (col == 0 || selected) return null;
+          return Text(text ?? '',
+              style: TextStyle(
+                color: Colors.green,
+              ));
+        },
+        onConfirm: (Picker picker, List value) {
+          print((picker.adapter as DateTimePickerAdapter).value);
+        }).showDialog(context);
+  }
+
   /// 自定义UI效果
   showPickerCustomizeUI(BuildContext context) {
     final itemExtent = 42.0;
@@ -561,7 +588,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final txtColor = Colors.white;
     final txtStyle = TextStyle(color: txtColor);
     final selectColor = Colors.black.withOpacity(0.20);
-    final delimiterChild =  Align(
+    final delimiterChild = Align(
       alignment: Alignment.center,
       child: Container(width: 50, height: itemExtent, color: selectColor),
     );
@@ -594,7 +621,10 @@ class _MyHomePageState extends State<MyHomePage> {
               )),
           PickerDelimiter(column: 4, child: delimiterChild),
         ],
-        title: Text("Select Time", style: txtStyle),
+        title: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
+          child: Text("Select Time", style: txtStyle),
+        ),
         onConfirm: (Picker picker, List value) {
           print(picker.adapter.text);
         }).showModal(context, builder: (context, view) {
