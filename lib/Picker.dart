@@ -173,7 +173,7 @@ class Picker {
     return _widget!;
   }
 
-  /// show picker
+  /// show picker bottom sheet
   void show(
     ScaffoldState state, {
     ThemeData? themeData,
@@ -181,6 +181,19 @@ class Picker {
     PickerWidgetBuilder? builder,
   }) {
     state.showBottomSheet((BuildContext context) {
+      final picker = makePicker(themeData);
+      return builder == null ? picker : builder(context, picker);
+    }, backgroundColor: backgroundColor);
+  }
+
+  /// show picker bottom sheet
+  void showBottomSheet(
+      BuildContext context, {
+        ThemeData? themeData,
+        Color? backgroundColor,
+        PickerWidgetBuilder? builder,
+      }) {
+    Scaffold.of(context).showBottomSheet((BuildContext context) {
       final picker = makePicker(themeData);
       return builder == null ? picker : builder(context, picker);
     }, backgroundColor: backgroundColor);
@@ -609,7 +622,6 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
 
   Widget _buildCupertinoPicker(BuildContext context,
       int i, int _length, PickerAdapter adapter, Key? key) {
-    int ref = 0;
     return CupertinoPicker.builder(
       key: key,
       backgroundColor: picker.backgroundColor,

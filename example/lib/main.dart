@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_picker/flutter_picker.dart';
+import 'package:flutter_picker_example/picker_test.dart';
 import 'PickerData.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -70,6 +71,12 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('Picker ${stateText.isEmpty ? "" : " - " + stateText}'),
         automaticallyImplyLeading: false,
         elevation: 0.0,
+        actions: [
+          IconButton(
+              onPressed: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (v) => RawPickerTest())),
+              icon: Icon(Icons.add))
+        ],
       ),
       body: Container(
         padding: EdgeInsets.all(10.0),
@@ -189,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
           print(value.toString());
           print(picker.getSelectedValues());
         });
-    picker.show(_scaffoldKey.currentState);
+    picker.showBottomSheet(context);
   }
 
   showPickerModal(BuildContext context) async {
@@ -269,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print(value.toString());
         print(picker.getSelectedValues());
       },
-    ).show(_scaffoldKey.currentState);
+    ).showBottomSheet(context);
   }
 
   showPickerDialog(BuildContext context) {
@@ -428,7 +435,7 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             stateText = picker.adapter.toString();
           });
-        }).show(_scaffoldKey.currentState);
+        }).showBottomSheet(context);
   }
 
   showPickerDateRange(BuildContext context) {
@@ -454,14 +461,14 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text(PickerLocalizations.of(context).cancelText)),
+          child: Text(PickerLocalizations.of(context).cancelText ?? '')),
       TextButton(
           onPressed: () {
             Navigator.pop(context);
-            ps.onConfirm(ps, ps.selecteds);
-            pe.onConfirm(pe, pe.selecteds);
+            ps.onConfirm?.call(ps, ps.selecteds);
+            pe.onConfirm?.call(pe, pe.selecteds);
           },
-          child: Text(PickerLocalizations.of(context).confirmText))
+          child: Text(PickerLocalizations.of(context).confirmText ?? ''))
     ];
 
     showDialog(
@@ -508,7 +515,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         onSelect: (Picker picker, int index, List<int> selected) {
           showMsg(picker.adapter.toString());
-        }).show(_scaffoldKey.currentState);
+        }).showBottomSheet(context);
   }
 
   /// 圆角背景
@@ -644,7 +651,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showPickerDurationSelect(BuildContext context) {
-    final range = <DateTime>[
+    final range = <DateTime?>[
       DateTime(0, 1, 1, 8, 30),
       DateTime(0, 1, 1, 14, 30)
     ];
@@ -710,11 +717,13 @@ class _MyHomePageState extends State<MyHomePage> {
         onSelect: (Picker picker, int index, List<int> selected) {
           range[1] = (picker.adapter as DateTimePickerAdapter).value;
         });
-    _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [p1.makePicker(), p2.makePicker()],
-      );
-    });
+    showBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [p1.makePicker(), p2.makePicker()],
+          );
+        });
   }
 }
