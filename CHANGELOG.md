@@ -1,3 +1,7 @@
+## 2.0.5 - 2022.07.19
+
+* close debug log (#178)
+
 ## 2.0.4 - 2022.06.28
 
 * Add `PickerLocalizations.registerCustomLanguage` function
