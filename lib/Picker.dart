@@ -5,7 +5,7 @@ import 'package:flutter/material.dart' as Dialog;
 import 'dart:async';
 import 'PickerLocalizations.dart';
 
-const bool __printDebug = true;
+const bool __printDebug = false;
 
 /// Picker selected callback.
 typedef PickerSelectedCallback = void Function(
