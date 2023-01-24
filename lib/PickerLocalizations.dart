@@ -79,7 +79,8 @@ class PickerLocalizations extends PickerLocalizationsBase {
     'ar',
     'fr',
     'es',
-    'tr'
+    'tr',
+    'ro'
   ];
 
   /// Language Values
@@ -155,7 +156,40 @@ class PickerLocalizations extends PickerLocalizationsBase {
         'Ekim',
         'Kasım',
         'Aralık'
-      ]
+      ],
     },
+    'ro': {
+      'cancelText': 'Anulează',
+      'confirmText': 'Confirmă',
+      'ampm': ['AM', 'PM'],
+      'months': [
+        'Ian',
+        'Feb',
+        'Mart',
+        'Apr',
+        'Mai',
+        'Iun',
+        'Iul',
+        'Aug',
+        'Sept',
+        'Oct',
+        'Nov',
+        'Dec',
+      ],
+      'monthsLong': [
+        'Ianuarie',
+        'Februarie',
+        'Martie',
+        'Aprilie',
+        'Mai',
+        'Iunie',
+        'Iulie',
+        'August',
+        'Septembrie',
+        'Octombrie',
+        'Noiembrie',
+        'Decembrie',
+      ],
+    }
   };
 }
