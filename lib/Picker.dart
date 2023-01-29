@@ -5,8 +5,6 @@ import 'package:flutter/material.dart' as Dialog;
 import 'dart:async';
 import 'PickerLocalizations.dart';
 
-const bool __printDebug = false;
-
 /// Picker selected callback.
 typedef PickerSelectedCallback = void Function(
     Picker picker, int index, List<int> selected);
@@ -107,6 +105,8 @@ class Picker {
   final double diameterRatio;
   final double squeeze;
 
+  final bool printDebug;
+
   Widget? _widget;
   PickerWidgetState? _state;
 
@@ -149,7 +149,8 @@ class Picker {
       this.onCancel,
       this.onSelect,
       this.onConfirmBefore,
-      this.onConfirm}) {
+      this.onConfirm,
+      this.printDebug = false}) {
     this.selecteds = selecteds == null ? <int>[] : selecteds;
   }
 
@@ -188,11 +189,11 @@ class Picker {
 
   /// show picker bottom sheet
   void showBottomSheet(
-      BuildContext context, {
-        ThemeData? themeData,
-        Color? backgroundColor,
-        PickerWidgetBuilder? builder,
-      }) {
+    BuildContext context, {
+    ThemeData? themeData,
+    Color? backgroundColor,
+    PickerWidgetBuilder? builder,
+  }) {
     Scaffold.of(context).showBottomSheet((BuildContext context) {
       final picker = makePicker(themeData);
       return builder == null ? picker : builder(context, picker);
@@ -532,7 +533,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
   final Map<int, int> lastData = {};
 
   List<Widget> _buildViews() {
-    if (__printDebug) print("_buildViews");
+    if (picker.printDebug) print("_buildViews");
     if (theme == null) theme = Theme.of(context);
     for (int j = 0; j < _keys.length; j++) _keys[j] = null;
 
@@ -560,7 +561,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                     builder: (context, state) {
                       _keys[i] = state;
                       adapter.setColumn(i - 1);
-                      if (__printDebug) print("builder. col: $i");
+                      if (picker.printDebug) print("builder. col: $i");
 
                       // 上一次是空列表
                       final _lastIsEmpty = scrollController[i].hasClients &&
@@ -575,7 +576,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                               picker.selecteds[i] >= _length)) {
                         Timer(Duration(milliseconds: 100), () {
                           if (!this.mounted) return;
-                          if (__printDebug) print("timer last");
+                          if (picker.printDebug) print("timer last");
                           var _len = adapter.length;
                           var _index = (_len < _length ? _len : _length) - 1;
                           if (scrollController[i]
@@ -620,8 +621,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     return items;
   }
 
-  Widget _buildCupertinoPicker(BuildContext context,
-      int i, int _length, PickerAdapter adapter, Key? key) {
+  Widget _buildCupertinoPicker(BuildContext context, int i, int _length,
+      PickerAdapter adapter, Key? key) {
     return CupertinoPicker.builder(
       key: key,
       backgroundColor: picker.backgroundColor,
@@ -640,7 +641,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       onSelectedItemChanged: (int _index) {
         if (_length <= 0) return;
         var index = _index % _length;
-        if (__printDebug) print("onSelectedItemChanged. col: $i, row: $index");
+        if (picker.printDebug)
+          print("onSelectedItemChanged. col: $i, row: $index");
         picker.selecteds[i] = index;
         updateScrollController(i);
         adapter.doSelect(i, index);
@@ -869,7 +871,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
         }
       }
     }
-    if (__printDebug) print("data.length: ${data.length}");
+    if (picker!.printDebug) print("data.length: ${data.length}");
   }
 
   _parsePickerDataItem(List? pickerData, List<PickerItem> data) {
@@ -905,7 +907,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     if (_datas != null && _col == index + 1) return;
     _col = index + 1;
     if (isArray) {
-      if (__printDebug) print("index: $index");
+      if (picker!.printDebug) print("index: $index");
       if (_col < data.length)
         _datas = data[_col].children;
       else
