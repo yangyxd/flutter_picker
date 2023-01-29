@@ -1,3 +1,3 @@
-export 'Picker.dart';
-export 'PickerLocalizations.dart';
-export 'PickerLocalizationsDelegate.dart';
+export 'picker.dart';
+export 'picker_localizations.dart';
+export 'picker_localizations_delegate.dart';

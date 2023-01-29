@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:flutter_picker_example/picker_test.dart';
-import 'PickerData.dart';
+import 'picker_data.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() => runApp(MyApp());
@@ -79,104 +80,103 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.add))
         ],
       ),
-      body: Container(
-        padding: EdgeInsets.all(10.0),
-        alignment: Alignment.topCenter,
-        child: ListView(
-          children: <Widget>[
-            ListTile(
-              title: Text('1. Picker Show'),
-              onTap: () {
-                showPicker(context);
-              },
-            ),
-            ListTile(
-              title: Text('2. Picker Show Modal'),
-              onTap: () {
-                showPickerModal(context);
-              },
-            ),
-            ListTile(
-              title: Text('3. Picker Show Icons'),
-              onTap: () {
-                showPickerIcons(context);
-              },
-            ),
-            ListTile(
-              title: Text('4. Picker Show (Array)'),
-              onTap: () {
-                showPickerArray(context);
-              },
-            ),
-            ListTile(
-              title: Text('5. Picker Show Number'),
-              onTap: () {
-                showPickerNumber(context);
-              },
-            ),
-            ListTile(
-              title: Text('6. Picker Show Number FormatValue'),
-              onTap: () {
-                showPickerNumberFormatValue(context);
-              },
-            ),
-            ListTile(
-              title: Text('7. Picker Show Date'),
-              onTap: () {
-                showPickerDate(context);
-              },
-            ),
-            ListTile(
-              title: Text('8. Picker Show Datetime'),
-              onTap: () {
-                showPickerDateTime(context);
-              },
-            ),
-            ListTile(
-              title: Text('9. Picker Show Date (Custom)'),
-              onTap: () {
-                showPickerDateCustom(context);
-              },
-            ),
-            ListTile(
-              title: Text('10. Picker Show Datetime (24)'),
-              onTap: () {
-                showPickerDateTime24(context);
-              },
-            ),
-            ListTile(
-              title: Text('11. Picker Show Datetime (Round background)'),
-              onTap: () {
-                showPickerDateTimeRoundBg(context);
-              },
-            ),
-            ListTile(
-              title: Text('12. Picker Show Date Range'),
-              onTap: () {
-                showPickerDateRange(context);
-              },
-            ),
-            ListTile(
-              title: Text('13. DurationPicker (time)'),
-              onTap: () {
-                showPickerDurationSelect(context);
-              },
-            ),
-            ListTile(
-              title: Text('14. Customize UI effects (time)'),
-              onTap: () {
-                showPickerCustomizeUI(context);
-              },
-            ),
-            ListTile(
-              title: Text('15. Use onBuilderItem'),
-              onTap: () {
-                showPickerCustomBuilder(context);
-              },
-            ),
-          ],
-        ),
-      ),
+      body: Builder(
+          builder: (context) => ListView(
+                padding: EdgeInsets.all(10.0),
+                children: <Widget>[
+                  ListTile(
+                    title: Text('1. Picker Show'),
+                    onTap: () {
+                      showPicker(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('2. Picker Show Modal'),
+                    onTap: () {
+                      showPickerModal(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('3. Picker Show Icons'),
+                    onTap: () {
+                      showPickerIcons(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('4. Picker Show (Array)'),
+                    onTap: () {
+                      showPickerArray(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('5. Picker Show Number'),
+                    onTap: () {
+                      showPickerNumber(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('6. Picker Show Number FormatValue'),
+                    onTap: () {
+                      showPickerNumberFormatValue(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('7. Picker Show Date'),
+                    onTap: () {
+                      showPickerDate(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('8. Picker Show Datetime'),
+                    onTap: () {
+                      showPickerDateTime(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('9. Picker Show Date (Custom)'),
+                    onTap: () {
+                      showPickerDateCustom(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('10. Picker Show Datetime (24)'),
+                    onTap: () {
+                      showPickerDateTime24(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('11. Picker Show Datetime (Round background)'),
+                    onTap: () {
+                      showPickerDateTimeRoundBg(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('12. Picker Show Date Range'),
+                    onTap: () {
+                      showPickerDateRange(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('13. DurationPicker (time)'),
+                    onTap: () {
+                      showPickerDurationSelect(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('14. Customize UI effects (time)'),
+                    onTap: () {
+                      showPickerCustomizeUI(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('15. Use onBuilderItem'),
+                    onTap: () {
+                      showPickerCustomBuilder(context);
+                    },
+                  ),
+                  const SizedBox(height: 60),
+                ],
+              )),
     );
   }
 
@@ -187,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
   showPicker(BuildContext context) async {
     Picker picker = Picker(
         adapter: PickerDataAdapter<String>(
-            pickerdata: JsonDecoder().convert(PickerData)),
+            pickerData: JsonDecoder().convert(PickerData)),
         changeToFirst: false,
         textAlign: TextAlign.left,
         textStyle: TextStyle(color: Colors.blue, fontFamily: _fontFamily),
@@ -203,7 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerModal(BuildContext context) async {
     final result = await Picker(
         adapter: PickerDataAdapter<String>(
-            pickerdata: JsonDecoder().convert(PickerData)),
+            pickerData: JsonDecoder().convert(PickerData)),
         changeToFirst: true,
         hideHeader: false,
         selectedTextStyle: TextStyle(color: Colors.blue),
@@ -283,7 +283,7 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerDialog(BuildContext context) {
     Picker(
         adapter: PickerDataAdapter<String>(
-            pickerdata: JsonDecoder().convert(PickerData)),
+            pickerData: JsonDecoder().convert(PickerData)),
         hideHeader: true,
         title: Text("Select Data"),
         selectedTextStyle: TextStyle(color: Colors.blue),
@@ -296,7 +296,7 @@ class _MyHomePageState extends State<MyHomePage> {
   showPickerArray(BuildContext context) {
     Picker(
         adapter: PickerDataAdapter<String>(
-          pickerdata: JsonDecoder().convert(PickerData2),
+          pickerData: JsonDecoder().convert(PickerData2),
           isArray: true,
         ),
         hideHeader: true,
@@ -407,6 +407,7 @@ class _MyHomePageState extends State<MyHomePage> {
           secondSuffix: "秒",
           minValue: DateTime.now(),
           minuteInterval: 30,
+          //value: DateTime.tryParse("2026-01-29 00:00:00.000"),
           //minHour: 1,
           //maxHour: 23,
           // twoDigitYear: true,

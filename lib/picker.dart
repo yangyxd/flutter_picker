@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as Dialog;
 import 'dart:async';
-import 'PickerLocalizations.dart';
+import 'picker_localizations.dart';
 
 /// Picker selected callback.
 typedef PickerSelectedCallback = void Function(
@@ -829,9 +829,9 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
   final bool isArray;
 
   PickerDataAdapter(
-      {List? pickerdata, List<PickerItem<T>>? data, this.isArray = false}) {
+      {List? pickerData, List<PickerItem<T>>? data, this.isArray = false}) {
     this.data = data ?? <PickerItem<T>>[];
-    _parseData(pickerdata);
+    _parseData(pickerData);
   }
 
   @override
@@ -871,7 +871,7 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
         }
       }
     }
-    if (picker!.printDebug) print("data.length: ${data.length}");
+    if (picker?.printDebug == true) print("data.length: ${data.length}");
   }
 
   _parsePickerDataItem(List? pickerData, List<PickerItem> data) {
@@ -947,12 +947,13 @@ class PickerDataAdapter<T> extends PickerAdapter<T> {
     if (picker!.onBuilderItem != null) {
       final _v = picker!.onBuilderItem!(
           context, item.value.toString(), item.text, isSel, _col, index);
-      if (_v != null) return _v;
+      if (_v != null) return makeText(_v, null, isSel);
     }
     if (item.text != null) {
       return isSel && picker!.selectedTextStyle != null
           ? DefaultTextStyle(
               style: picker!.selectedTextStyle!,
+              textAlign: picker!.textAlign,
               child: picker!.selectedIconTheme != null
                   ? IconTheme(
                       data: picker!.selectedIconTheme!,
@@ -1114,7 +1115,7 @@ class NumberPickerAdapter extends PickerAdapter<int> {
     final isSel = index == picker!.selecteds[_col];
     if (picker!.onBuilderItem != null) {
       final _v = picker!.onBuilderItem!(context, txt, null, isSel, _col, index);
-      if (_v != null) return _v;
+      if (_v != null) return makeText(_v, null, isSel);
     }
     if (cur!.postfix == null && cur!.suffix == null)
       return makeText(null, txt, isSel);
@@ -1386,7 +1387,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       case 7: // hour am/pm
         if ((minHour != null && minHour! >= 0) ||
             (maxHour != null && maxHour! <= 23)) if (_colAP < 0) {
-          // I don't know am or PM
+          // I don't know AM or PM
           return 12;
         } else {
           var _min = 0;
@@ -1506,9 +1507,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
               "${intToStr(index * minuteInterval!)}${_checkStr(minuteSuffix)}";
         break;
       case 6:
-        List? _ampm = strAMPM ?? PickerLocalizations.of(context).ampm;
-        if (_ampm == null) _ampm = const ['AM', 'PM'];
-        _text = "${_ampm[index]}";
+        final apStr = strAMPM ??
+            PickerLocalizations.of(context).ampm ??
+            const ['AM', 'PM'];
+        _text = "${apStr[index]}";
         break;
       case 7:
         _text =
@@ -1519,7 +1521,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
     final isSel = picker!.selecteds[_col] == index;
     if (picker!.onBuilderItem != null) {
       var _v = picker!.onBuilderItem!(context, _text, null, isSel, _col, index);
-      if (_v != null) return _v;
+      if (_v != null) return makeText(_v, null, isSel);
     }
     return makeText(null, _text, isSel);
   }
@@ -1541,6 +1543,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
   void doShow() {
     if (_yearBegin == 0) getLength();
     var _maxLevel = getMaxLevel();
+    final sh = value!.hour;
     for (int i = 0; i < _maxLevel; i++) {
       int colType = getColumnType(i);
       switch (colType) {
@@ -1556,7 +1559,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           picker!.selecteds[i] = value!.day - 1;
           break;
         case 3:
-          var h = value!.hour;
+          var h = sh;
           if ((minHour != null && minHour! >= 0) ||
               (maxHour != null && maxHour! <= 23)) {
             if (minHour != null) {
@@ -1568,6 +1571,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           picker!.selecteds[i] = h;
           break;
         case 4:
+          // minute
           if (minuteInterval == null || minuteInterval! < 2) {
             picker!.selecteds[i] = value!.minute;
           } else {
@@ -1577,8 +1581,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
               // 需要更新 value
               var s = value!.second;
               if (type != 2 && type != 6) s = 0;
-              value = DateTime(
-                  value!.year, value!.month, value!.day, value!.hour, m, s);
+              final h = _colAP >= 0 ? _calcHourOfAMPM(sh, m) : sh;
+              value = DateTime(value!.year, value!.month, value!.day, h, m, s);
             }
           }
           break;
@@ -1586,14 +1590,18 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
           picker!.selecteds[i] = value!.second;
           break;
         case 6:
-          picker!.selecteds[i] = (value!.hour > 12 || value!.hour == 0) ? 1 : 0;
+          // am/pm
+          picker!.selecteds[i] = (sh > 12 ||
+                  (sh == 12 && (value!.minute > 0 || value!.second > 0)))
+              ? 1
+              : 0;
           break;
         case 7:
-          picker!.selecteds[i] = value!.hour == 0
+          picker!.selecteds[i] = sh == 0
               ? 11
-              : (value!.hour > 12)
-                  ? value!.hour - 12 - 1
-                  : value!.hour - 1;
+              : (sh > 12)
+                  ? sh - 12 - 1
+                  : sh - 1;
           break;
       }
     }
@@ -1627,18 +1635,15 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
         m = (minuteInterval == null || minuteInterval! < 2)
             ? index
             : index * minuteInterval!;
+        if (_colAP >= 0) {
+          h =  _calcHourOfAMPM(h, m);
+        }
         break;
       case 5:
         s = index;
         break;
       case 6:
-        if (picker!.selecteds[_colAP] == 0) {
-          if (h == 0) h = 12;
-          if (h > 12) h = h - 12;
-        } else {
-          if (h < 12) h = h + 12;
-          if (h == 12) h = 0;
-        }
+        h = _calcHourOfAMPM(h, m);
         if (minHour != null || maxHour != null) {
           if (minHour != null && _colHour >= 0) {
             if (h < minHour!) {
@@ -1656,7 +1661,9 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
                 ? 0
                 : (picker!.selecteds[_colAP] == 0 ? minHour! : 0)) +
             1;
-        if (_colAP >= 0 && picker!.selecteds[_colAP] == 1) h = h + 12;
+        if (_colAP >= 0) {
+          h = _calcHourOfAMPM(h, m);
+        }
         if (h > 23) h = 0;
         break;
     }
@@ -1696,6 +1703,32 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       return true;
     }
     return false;
+  }
+
+  // Calculate am/pm time transfer
+  int _calcHourOfAMPM(int h, int m) {
+    // 12:00 AM , 00:00:000
+    // 12:30 AM , 12:30:000
+    // 12:00 PM , 12:00:000
+    // 12:30 PM , 00:30:000
+    if (picker!.selecteds[_colAP] == 0) {
+      // am
+      if (h == 12 && m == 0) {
+        h = 0;
+      } else if (h == 0 && m > 0) {
+        h = 12;
+      }
+      if (h > 12) h = h - 12;
+    } else {
+      // pm
+      if (h > 0 && h < 12) h = h + 12;
+      if (h == 12 && m > 0) {
+        h = 0;
+      } else if (h == 0 && m == 0) {
+        h = 12;
+      }
+    }
+    return h;
   }
 
   int _getAPColIndex() {

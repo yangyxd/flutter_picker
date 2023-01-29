@@ -1,3 +1,9 @@
+## 2.1.0 - 2023.01.29
+
+* Follow the file naming convention in Effective Dart, #59
+* fix: AM/PM are backward for 12:00, #185
+* added ROMANIAN localization
+
 ## 2.0.5 - 2022.07.19
 
 * close debug log (#178)
