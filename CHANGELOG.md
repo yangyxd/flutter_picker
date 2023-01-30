@@ -1,3 +1,7 @@
+## 2.1.1 - 2023.01.30
+
+* Support `dark` theme.
+
 ## 2.1.0 - 2023.01.29
 
 * Follow the file naming convention in Effective Dart, #59
@@ -64,7 +68,7 @@
 ## 1.0.15
 
 * Move the edge of the head to the bottom of the head so that it can be hidden by customization. #55 (thank: @StarOfLife)
-* Repair bug: .showDialog(contex) - error for define style #49 (thank: @nielgomes)
+* Repair bug: .showDialog(context) - error for define style #49 (thank: @nielgomes)
 * Repair bug: Change superior data, lower data display blank #48 (thank: @DemoJameson)
 
 ## 1.0.14

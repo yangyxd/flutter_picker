@@ -129,7 +129,7 @@ class Picker {
       this.confirm,
       this.cancelText,
       this.confirmText,
-      this.backgroundColor = Colors.white,
+      this.backgroundColor,
       this.containerColor,
       this.headerColor,
       this.builderHeader,
@@ -426,7 +426,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                   bottom: BorderSide(color: theme!.dividerColor, width: 0.5),
                 ),
                 color: picker.headerColor == null
-                    ? (theme!.bottomAppBarColor)
+                    ? theme?.bottomAppBarTheme.color
                     : picker.headerColor,
               ),
         ));
@@ -479,7 +479,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       child: picker.title == null
           ? SizedBox()
           : DefaultTextStyle(
-              style: theme!.textTheme.headline6?.copyWith(
+              style: (theme!.textTheme.headline6 ?? theme!.textTheme.titleLarge)
+                      ?.copyWith(
                     fontSize: Picker.DefaultTextSize,
                   ) ??
                   TextStyle(fontSize: Picker.DefaultTextSize),
@@ -541,13 +542,13 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     PickerAdapter? adapter = picker.adapter;
     adapter.setColumn(-1);
 
-    if (adapter.length > 0) {
-      var _decoration = BoxDecoration(
-        color: picker.containerColor == null
-            ? theme!.dialogBackgroundColor
-            : picker.containerColor,
-      );
+    final _decoration = BoxDecoration(
+      color: picker.containerColor == null
+          ? theme!.dialogBackgroundColor
+          : picker.containerColor,
+    );
 
+    if (adapter.length > 0) {
       for (int i = 0; i < picker._maxLevel; i++) {
         Widget view = Expanded(
           flex: adapter.getColumnFlex(i),
@@ -606,7 +607,12 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       for (int i = 0; i < picker.delimiter!.length; i++) {
         var o = picker.delimiter![i];
         if (o.child == null) continue;
-        var item = SizedBox(child: o.child, height: picker.height);
+        var item = SizedBox(
+            child: DecoratedBox(
+              decoration: _decoration,
+              child: o.child,
+            ),
+            height: picker.height);
         if (o.column < 0)
           items.insert(0, item);
         else if (o.column >= items.length)
@@ -715,6 +721,9 @@ abstract class PickerAdapter<T> {
   }
 
   Widget makeText(Widget? child, String? text, bool isSel) {
+    final theme = picker!.textStyle != null || picker!.state?.context == null
+        ? null
+        : Theme.of(picker!.state!.context);
     return Center(
         child: DefaultTextStyle(
             overflow: TextOverflow.ellipsis,
@@ -722,13 +731,12 @@ abstract class PickerAdapter<T> {
             textAlign: picker!.textAlign,
             style: picker!.textStyle ??
                 TextStyle(
-                    color: Colors.black87,
-                    fontFamily: picker?.state?.context != null
-                        ? Theme.of(picker!.state!.context)
-                            .textTheme
-                            .headline6!
-                            .fontFamily
-                        : "",
+                    color: theme?.brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black87,
+                    fontFamily: theme == null
+                        ? ""
+                        : theme.textTheme.headline6?.fontFamily,
                     fontSize: Picker.DefaultTextSize),
             child: child != null
                 ? (isSel && picker!.selectedIconTheme != null
@@ -749,8 +757,11 @@ abstract class PickerAdapter<T> {
     items.add(
         child ?? Text(text, style: (isSel ? picker!.selectedTextStyle : null)));
     if (suffix != null) items.add(suffix);
-
-    Color? _txtColor = Colors.black87;
+    final theme = picker!.textStyle != null || picker!.state?.context == null
+        ? null
+        : Theme.of(picker!.state!.context);
+    Color? _txtColor =
+        theme?.brightness == Brightness.dark ? Colors.white : Colors.black87;
     double? _txtSize = Picker.DefaultTextSize;
     if (isSel && picker!.selectedTextStyle != null) {
       if (picker!.selectedTextStyle!.color != null)
@@ -759,14 +770,18 @@ abstract class PickerAdapter<T> {
         _txtSize = picker!.selectedTextStyle!.fontSize;
     }
 
-    return new Center(
-        //alignment: Alignment.center,
+    return Center(
         child: DefaultTextStyle(
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             textAlign: picker!.textAlign,
             style: picker!.textStyle ??
-                TextStyle(color: _txtColor, fontSize: _txtSize),
+                TextStyle(
+                    color: _txtColor,
+                    fontSize: _txtSize,
+                    fontFamily: theme == null
+                        ? ""
+                        : theme.textTheme.headline6?.fontFamily),
             child: Wrap(
               children: items,
             )));
@@ -1636,7 +1651,7 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
             ? index
             : index * minuteInterval!;
         if (_colAP >= 0) {
-          h =  _calcHourOfAMPM(h, m);
+          h = _calcHourOfAMPM(h, m);
         }
         break;
       case 5:
