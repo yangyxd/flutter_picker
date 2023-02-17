@@ -1284,8 +1284,10 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       _columnType = columnType[type];
     var month = _columnType.indexWhere((element) => element == 1);
     var day = _columnType.indexWhere((element) => element == 2);
-    _needUpdatePrev =
-        day < month || day < _columnType.indexWhere((element) => element == 0);
+    if (month != -1 && day != -1) {
+      _needUpdatePrev = day < month ||
+          day < _columnType.indexWhere((element) => element == 0);
+    }
     if (!_needUpdatePrev) {
       // check am/pm before hour-ap
       var ap = _columnType.indexWhere((element) => element == 6);
