@@ -222,10 +222,12 @@ class Picker {
   Future<List<int>?> showDialog(BuildContext context,
       {bool barrierDismissible = true,
       Color? backgroundColor,
+      Color? barrierColor,
       PickerWidgetBuilder? builder,
       Key? key}) {
     return Dialog.showDialog<List<int>>(
         context: context,
+        barrierColor: barrierColor,
         barrierDismissible: barrierDismissible,
         builder: (BuildContext context) {
           final actions = <Widget>[];
