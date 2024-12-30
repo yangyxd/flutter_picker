@@ -217,11 +217,7 @@ class Picker {
           return builder == null ? picker : builder(context, picker);
         });
   }
-    
-  /// get widget
-  Widget getWidget(BuildContext context) {
-    return builder == null ? picker : builder(context, picker);
-  }
+
 
   /// show dialog picker
   Future<List<int>?> showDialog(BuildContext context,
