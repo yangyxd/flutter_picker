@@ -26,15 +26,12 @@ const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
 };
 
 class _MyAppState extends State<MyApp> {
-  bool dark = false;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         theme: ThemeData(
           primarySwatch: Colors.blue,
           fontFamily: _fontFamily,
-          brightness: dark ? Brightness.dark : Brightness.light,
           primaryTextTheme: TextTheme().apply(fontFamily: _fontFamily),
         ),
         scrollBehavior: const MaterialScrollBehavior()
@@ -77,18 +74,9 @@ class _MyHomePageState extends State<MyHomePage> {
         elevation: 0.0,
         actions: [
           IconButton(
-              onPressed: () {
-                final appState = context.findAncestorStateOfType<_MyAppState>();
-                if (appState == null) return;
-                appState.setState(() {
-                  appState.dark = !appState.dark;
-                });
-              },
-              icon: Icon(Icons.sunny_snowing)),
-          IconButton(
               onPressed: () => Navigator.push(
                   context, MaterialPageRoute(builder: (v) => RawPickerTest())),
-              icon: Icon(Icons.add)),
+              icon: Icon(Icons.add))
         ],
       ),
       body: Builder(
@@ -185,12 +173,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       showPickerCustomBuilder(context);
                     },
                   ),
-                  ListTile(
-                    title: Text('16. Select year'),
-                    onTap: () {
-                      showPickerSelectYear(context);
-                    },
-                  ),
                   const SizedBox(height: 60),
                 ],
               )),
@@ -198,8 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showMsg(String msg) {
-    final state = ScaffoldMessenger.of(context);
-    state.showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   showPicker(BuildContext context) async {
@@ -208,11 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
             pickerData: JsonDecoder().convert(PickerData)),
         changeToFirst: false,
         textAlign: TextAlign.left,
-        textStyle: TextStyle(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.yellow
-                : Colors.blue,
-            fontFamily: _fontFamily),
+        textStyle: TextStyle(color: Colors.blue, fontFamily: _fontFamily),
         selectedTextStyle: TextStyle(color: Colors.red),
         columnPadding: const EdgeInsets.all(8.0),
         onConfirm: (Picker picker, List value) {
@@ -436,7 +413,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         title: Text("Select DateTime"),
         textAlign: TextAlign.right,
-        // selectedTextStyle: TextStyle(color: Colors.blue),
+        selectedTextStyle: TextStyle(color: Colors.blue),
         delimiter: [
           PickerDelimiter(
               column: 5,
@@ -444,6 +421,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: 16.0,
                 alignment: Alignment.center,
                 child: Text(':', style: TextStyle(fontWeight: FontWeight.bold)),
+                color: Colors.white,
               ))
         ],
         footer: Container(
@@ -567,6 +545,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: 12.0,
                 alignment: Alignment.center,
                 child: Text(':', style: TextStyle(fontWeight: FontWeight.bold)),
+                color: Colors.white,
               )),
         ],
         title: Text("Select DateTime"),
@@ -579,7 +558,7 @@ class _MyHomePageState extends State<MyHomePage> {
     picker.showModal(context, backgroundColor: Colors.transparent,
         builder: (context, view) {
       return Material(
-          // color: Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(10), topRight: Radius.circular(10)),
           child: Container(
@@ -694,7 +673,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
                         fontSize: 14)),
-                // color: Colors.white,
+                color: Colors.white,
               )),
         ],
         onSelect: (Picker picker, int index, List<int> selected) {
@@ -733,7 +712,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
                         fontSize: 14)),
-                // color: Colors.white,
+                color: Colors.white,
               )),
         ],
         onSelect: (Picker picker, int index, List<int> selected) {
@@ -747,22 +726,5 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [p1.makePicker(), p2.makePicker()],
           );
         });
-  }
-
-  showPickerSelectYear(BuildContext context) {
-    Picker(
-        adapter: DateTimePickerAdapter(
-          type: PickerDateTimeType.kY,
-          yearSuffix: "年",
-          yearBegin: 1950,
-          yearEnd: 2025,
-        ),
-        title: Text("Select Year"),
-        onConfirm: (Picker picker, List value) {
-          print(picker.adapter.text);
-        },
-        onSelect: (Picker picker, int index, List<int> selected) {
-          print(picker.adapter.toString());
-        }).showBottomSheet(context);
   }
 }

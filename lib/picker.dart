@@ -71,7 +71,7 @@ class Picker {
   final IconThemeData? selectedIconTheme;
 
   /// Text scaling factor
-  final double? textScaleFactor;
+  final TextScaler? textScaler;
 
   final EdgeInsetsGeometry? columnPadding;
   final Color? backgroundColor, headerColor, containerColor;
@@ -123,13 +123,13 @@ class Picker {
       this.selectedTextStyle,
       this.selectedIconTheme,
       this.textAlign = TextAlign.start,
-      this.textScaleFactor,
+      this.textScaler,
       this.title,
       this.cancel,
       this.confirm,
       this.cancelText,
       this.confirmText,
-      this.backgroundColor,
+      this.backgroundColor = Colors.white,
       this.containerColor,
       this.headerColor,
       this.builderHeader,
@@ -155,6 +155,7 @@ class Picker {
   }
 
   Widget? get widget => _widget;
+
   PickerWidgetState? get state => _state;
   int _maxLevel = 1;
 
@@ -208,7 +209,8 @@ class Picker {
       Color? backgroundColor,
       PickerWidgetBuilder? builder}) async {
     return await showModalBottomSheet<T>(
-        context: context, //state.context,
+        context: context,
+        //state.context,
         isScrollControlled: isScrollControlled,
         useRootNavigator: useRootNavigator,
         backgroundColor: backgroundColor,
@@ -217,22 +219,15 @@ class Picker {
           return builder == null ? picker : builder(context, picker);
         });
   }
-    
-  /// get widget
-  Widget getWidget(BuildContext context) {
-    return builder == null ? picker : builder(context, picker);
-  }
 
   /// show dialog picker
   Future<List<int>?> showDialog(BuildContext context,
       {bool barrierDismissible = true,
       Color? backgroundColor,
-      Color? barrierColor,
       PickerWidgetBuilder? builder,
       Key? key}) {
     return Dialog.showDialog<List<int>>(
         context: context,
-        barrierColor: barrierColor,
         barrierDismissible: barrierDismissible,
         builder: (BuildContext context) {
           final actions = <Widget>[];
@@ -325,6 +320,7 @@ class Picker {
 class PickerDelimiter {
   final Widget? child;
   final int column;
+
   PickerDelimiter({required this.child, this.column = 1});
 }
 
@@ -344,8 +340,10 @@ class PickerItem<T> {
 
 class PickerWidget<T> extends InheritedWidget {
   final Picker data;
+
   const PickerWidget({Key? key, required this.data, required Widget child})
       : super(key: key, child: child);
+
   @override
   bool updateShouldNotify(covariant PickerWidget oldWidget) =>
       oldWidget.data != data;
@@ -360,6 +358,7 @@ class _PickerWidget<T> extends StatefulWidget {
   final Picker picker;
   final ThemeData? themeData;
   final bool isModal;
+
   _PickerWidget(
       {Key? key, required this.picker, this.themeData, required this.isModal})
       : super(key: key);
@@ -372,6 +371,7 @@ class _PickerWidget<T> extends StatefulWidget {
 class PickerWidgetState<T> extends State<_PickerWidget> {
   final Picker picker;
   final ThemeData? themeData;
+
   PickerWidgetState({required this.picker, this.themeData});
 
   ThemeData? theme;
@@ -433,7 +433,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
                   bottom: BorderSide(color: theme!.dividerColor, width: 0.5),
                 ),
                 color: picker.headerColor == null
-                    ? theme?.bottomAppBarTheme.color
+                    ? (theme!.bottomAppBarTheme.color)
                     : picker.headerColor,
               ),
         ));
@@ -526,7 +526,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
           onPressed: onPressed,
           child: Text(_txt,
               overflow: TextOverflow.ellipsis,
-              textScaleFactor: MediaQuery.of(context).textScaleFactor,
+              textScaler: MediaQuery.of(context).textScaler,
               style: textStyle));
     } else {
       return textStyle == null
@@ -548,13 +548,13 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     PickerAdapter? adapter = picker.adapter;
     adapter.setColumn(-1);
 
-    final _decoration = BoxDecoration(
-      color: picker.containerColor == null
-          ? theme!.dialogBackgroundColor
-          : picker.containerColor,
-    );
-
     if (adapter.length > 0) {
+      var _decoration = BoxDecoration(
+        color: picker.containerColor == null
+            ? theme!.dialogTheme.backgroundColor
+            : picker.containerColor,
+      );
+
       for (int i = 0; i < picker._maxLevel; i++) {
         Widget view = Expanded(
           flex: adapter.getColumnFlex(i),
@@ -613,12 +613,7 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       for (int i = 0; i < picker.delimiter!.length; i++) {
         var o = picker.delimiter![i];
         if (o.child == null) continue;
-        var item = SizedBox(
-            child: DecoratedBox(
-              decoration: _decoration,
-              child: o.child,
-            ),
-            height: picker.height);
+        var item = SizedBox(child: o.child, height: picker.height);
         if (o.column < 0)
           items.insert(0, item);
         else if (o.column >= items.length)
@@ -715,9 +710,13 @@ abstract class PickerAdapter<T> {
   Picker? picker;
 
   int getLength();
+
   int getMaxLevel();
+
   void setColumn(int index);
+
   void initSelects();
+
   Widget buildItem(BuildContext context, int index);
 
   /// 是否需要更新前面的列
@@ -727,9 +726,6 @@ abstract class PickerAdapter<T> {
   }
 
   Widget makeText(Widget? child, String? text, bool isSel) {
-    final theme = picker!.textStyle != null || picker!.state?.context == null
-        ? null
-        : Theme.of(picker!.state!.context);
     return Center(
         child: DefaultTextStyle(
             overflow: TextOverflow.ellipsis,
@@ -737,12 +733,13 @@ abstract class PickerAdapter<T> {
             textAlign: picker!.textAlign,
             style: picker!.textStyle ??
                 TextStyle(
-                    color: theme?.brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black87,
-                    fontFamily: theme == null
-                        ? ""
-                        : theme.textTheme.titleLarge?.fontFamily,
+                    color: Colors.black87,
+                    fontFamily: picker?.state?.context != null
+                        ? Theme.of(picker!.state!.context)
+                            .textTheme
+                            .titleLarge!
+                            .fontFamily
+                        : "",
                     fontSize: Picker.DefaultTextSize),
             child: child != null
                 ? (isSel && picker!.selectedIconTheme != null
@@ -752,7 +749,7 @@ abstract class PickerAdapter<T> {
                       )
                     : child)
                 : Text(text ?? "",
-                    textScaleFactor: picker!.textScaleFactor,
+                    textScaler: picker!.textScaler,
                     style: (isSel ? picker!.selectedTextStyle : null))));
   }
 
@@ -763,11 +760,8 @@ abstract class PickerAdapter<T> {
     items.add(
         child ?? Text(text, style: (isSel ? picker!.selectedTextStyle : null)));
     if (suffix != null) items.add(suffix);
-    final theme = picker!.textStyle != null || picker!.state?.context == null
-        ? null
-        : Theme.of(picker!.state!.context);
-    Color? _txtColor =
-        theme?.brightness == Brightness.dark ? Colors.white : Colors.black87;
+
+    Color? _txtColor = Colors.black87;
     double? _txtSize = Picker.DefaultTextSize;
     if (isSel && picker!.selectedTextStyle != null) {
       if (picker!.selectedTextStyle!.color != null)
@@ -776,18 +770,14 @@ abstract class PickerAdapter<T> {
         _txtSize = picker!.selectedTextStyle!.fontSize;
     }
 
-    return Center(
+    return new Center(
+        //alignment: Alignment.center,
         child: DefaultTextStyle(
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             textAlign: picker!.textAlign,
             style: picker!.textStyle ??
-                TextStyle(
-                    color: _txtColor,
-                    fontSize: _txtSize,
-                    fontFamily: theme == null
-                        ? ""
-                        : theme.textTheme.titleLarge?.fontFamily),
+                TextStyle(color: _txtColor, fontSize: _txtSize),
             child: Wrap(
               children: items,
             )));
@@ -802,6 +792,7 @@ abstract class PickerAdapter<T> {
   }
 
   void doShow() {}
+
   void doSelect(int column, int index) {}
 
   int getColumnFlex(int column) {
@@ -1290,10 +1281,8 @@ class DateTimePickerAdapter extends PickerAdapter<DateTime> {
       _columnType = columnType[type];
     var month = _columnType.indexWhere((element) => element == 1);
     var day = _columnType.indexWhere((element) => element == 2);
-    if (month != -1 && day != -1) {
-      _needUpdatePrev = day < month ||
-          day < _columnType.indexWhere((element) => element == 0);
-    }
+    _needUpdatePrev =
+        day < month || day < _columnType.indexWhere((element) => element == 0);
     if (!_needUpdatePrev) {
       // check am/pm before hour-ap
       var ap = _columnType.indexWhere((element) => element == 6);

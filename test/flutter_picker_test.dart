@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
 
   test('adds one to input values', () {
-    final v = null as List;
+    final List? v = null;
     print(v);
     expect(v, null);
 //    final calculator = Calculator();
